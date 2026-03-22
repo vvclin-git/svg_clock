@@ -1,0 +1,17 @@
+.readout {
+  position: absolute;
+  left: 50%;
+  top: 61%;
+  transform: translate(-50%, -50%);
+  min-width: 7.4ch;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(21, 50, 67, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 250, 241, 0.88);
+  color: #153243;
+  font-family: var(--font-mono);
+  font-size: clamp(0.85rem, 2.2vw, 1.15rem);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: 0 6px 14px rgba(21, 50, 67, 0.08);
+}

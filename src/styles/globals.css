@@ -1,0 +1,9 @@
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: #eadbc2;
+}
+
+button {
+  font-family: inherit;
+}

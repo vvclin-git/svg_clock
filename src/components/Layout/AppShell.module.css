@@ -1,0 +1,15 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background:
+    radial-gradient(circle at top, rgba(255, 250, 241, 0.95), rgba(255, 250, 241, 0.72) 35%, transparent 65%),
+    linear-gradient(180deg, #f8f1e4 0%, #eadbc2 100%);
+  color: var(--color-ink);
+}
+
+.main {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}

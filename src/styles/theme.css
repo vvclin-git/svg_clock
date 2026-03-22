@@ -1,0 +1,8 @@
+:root {
+  --color-ink: #153243;
+  --color-muted: #5b7382;
+  --color-paper: #fffaf1;
+  --font-display: "Georgia", "Times New Roman", serif;
+  --font-body: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-mono: "Consolas", "SFMono-Regular", monospace;
+}

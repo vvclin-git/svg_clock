@@ -1,0 +1,27 @@
+.button {
+  min-height: 44px;
+  padding: 0.75rem 1.15rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #153243, #284b63);
+  color: #fffaf1;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  box-shadow: 0 10px 22px rgba(21, 50, 67, 0.2);
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.button:focus-visible {
+  outline: 3px solid rgba(40, 75, 99, 0.24);
+  outline-offset: 3px;
+}
