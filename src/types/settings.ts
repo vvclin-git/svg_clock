@@ -1,4 +1,4 @@
-export type FaceStyle = "minimal" | "classic" | "roman";
+export type FaceStyle = "minimal" | "classic" | "roman" | "dual-ring";
 export type HandStyle = "bar" | "sword" | "breguet";
 
 export type ClockSettings = {

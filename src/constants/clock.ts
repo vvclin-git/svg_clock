@@ -4,7 +4,7 @@ import type { ClockSettings } from "../types/settings";
 export const DEFAULT_CLOCK_SETTINGS: ClockSettings = {
   showSecondHand: true,
   showDigitalTime: true,
-  faceStyle: "minimal",
+  faceStyle: "dual-ring",
   handStyle: "bar",
 };
 
