@@ -5,6 +5,9 @@ type HandHitAreaProps = {
   hand: HandType;
   angle: number;
   radius: number;
+  offsetX: number;
+  offsetY: number;
+  radialOffset: number;
   onPointerDown: PointerEventHandler<SVGLineElement>;
   onPointerMove: PointerEventHandler<SVGLineElement>;
   onPointerUp: PointerEventHandler<SVGLineElement>;
@@ -15,6 +18,9 @@ export function HandHitArea({
   hand,
   angle,
   radius,
+  offsetX,
+  offsetY,
+  radialOffset,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -24,10 +30,10 @@ export function HandHitArea({
 
   return (
     <line
-      x1="50"
-      y1="50"
-      x2="50"
-      y2={endY}
+      x1={50 + offsetX}
+      y1={50 + offsetY + radialOffset}
+      x2={50 + offsetX}
+      y2={endY + offsetY + radialOffset}
       stroke="transparent"
       strokeWidth={radius}
       strokeLinecap="round"

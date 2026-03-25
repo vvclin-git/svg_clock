@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-03-25
+
+### Added
+- Added a new `dual-ring` clock face style with an outer minute ring and inner full-hour numeral ring.
+- Added GitHub Pages deployment workflow for building and publishing the Vite app from GitHub Actions.
+- Added per-hand `offsetX`, `offsetY`, and `radialOffset` controls for tuning hand placement without editing SVG assets.
+
+### Changed
+- Refined the `dual-ring` face typography and spacing to reduce visual clutter and improve hour/minute hierarchy.
+- Set the default face style to `dual-ring`.
+
 ## [0.1.0] - 2026-03-23
 
 ### Added
