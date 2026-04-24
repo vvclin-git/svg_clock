@@ -46,6 +46,38 @@
   color: #8e2835;
 }
 
+.toggleButton {
+  min-height: 44px;
+  padding: 0.72rem 1rem;
+  border: 1px solid rgba(21, 50, 67, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 250, 241, 0.72);
+  color: var(--color-ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.toggleButton[aria-pressed="true"] {
+  border-color: rgba(21, 50, 67, 0.36);
+  background: rgba(21, 50, 67, 0.1);
+}
+
+.toggleButton:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 250, 241, 0.94);
+}
+
+.toggleButton:active {
+  transform: translateY(0);
+}
+
+.toggleButton:focus-visible {
+  outline: 3px solid rgba(40, 75, 99, 0.24);
+  outline-offset: 3px;
+}
+
 @media (max-width: 640px) {
   .bar {
     padding-inline: 1rem;

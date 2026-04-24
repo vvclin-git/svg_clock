@@ -24,7 +24,7 @@ export function useHandDrag(api: DragApi) {
     onPointerDown: (event) => {
       event.preventDefault();
       activePointerIdRef.current = event.pointerId;
-      event.currentTarget.setPointerCapture(event.pointerId);
+      event.currentTarget.setPointerCapture?.(event.pointerId);
       api.beginDrag(hand, pointerAngle(event));
     },
     onPointerMove: (event) => {
@@ -39,7 +39,7 @@ export function useHandDrag(api: DragApi) {
         return;
       }
 
-      event.currentTarget.releasePointerCapture(event.pointerId);
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
       activePointerIdRef.current = null;
       api.endDrag();
     },

@@ -3,11 +3,13 @@ import type { HandType } from "../../types/clock";
 
 type HandHitAreaProps = {
   hand: HandType;
+  x: number;
+  y: number;
   angle: number;
-  radius: number;
-  offsetX: number;
-  offsetY: number;
-  radialOffset: number;
+  length: number;
+  strokeWidth: number;
+  offsetX?: number;
+  offsetY?: number;
   onPointerDown: PointerEventHandler<SVGLineElement>;
   onPointerMove: PointerEventHandler<SVGLineElement>;
   onPointerUp: PointerEventHandler<SVGLineElement>;
@@ -16,28 +18,33 @@ type HandHitAreaProps = {
 
 export function HandHitArea({
   hand,
+  x,
+  y,
   angle,
-  radius,
+  length,
+  strokeWidth,
   offsetX,
   offsetY,
-  radialOffset,
   onPointerDown,
   onPointerMove,
   onPointerUp,
   onPointerCancel,
 }: HandHitAreaProps) {
-  const endY = hand === "hour" ? 26 : 13;
+  const localOffsetX = offsetX ?? 0;
+  const localOffsetY = offsetY ?? 0;
+  const endY = y - length + localOffsetY;
 
   return (
     <line
-      x1={50 + offsetX}
-      y1={50 + offsetY + radialOffset}
-      x2={50 + offsetX}
-      y2={endY + offsetY + radialOffset}
+      data-hand-hit-area={hand}
+      x1={x + localOffsetX}
+      y1={y + localOffsetY}
+      x2={x + localOffsetX}
+      y2={endY}
       stroke="transparent"
-      strokeWidth={radius}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
-      transform={`rotate(${angle} 50 50)`}
+      transform={`rotate(${angle} ${x} ${y})`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

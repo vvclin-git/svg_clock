@@ -6,7 +6,7 @@ type DigitalTimeDisplayProps = {
 
 export function DigitalTimeDisplay({ value }: DigitalTimeDisplayProps) {
   return (
-    <div className={styles.readout} aria-live="polite">
+    <div className={styles.readout} aria-label="Digital time" aria-live="polite">
       {value}
     </div>
   );

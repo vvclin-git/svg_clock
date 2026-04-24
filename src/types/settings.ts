@@ -1,9 +1,7 @@
-export type FaceStyle = "minimal" | "classic" | "roman" | "dual-ring";
-export type HandStyle = "bar" | "sword" | "breguet";
+import type { ClockSceneId } from "./scene";
 
 export type ClockSettings = {
   showSecondHand: boolean;
   showDigitalTime: boolean;
-  faceStyle: FaceStyle;
-  handStyle: HandStyle;
+  sceneId: ClockSceneId;
 };
