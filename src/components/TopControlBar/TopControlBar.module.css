@@ -33,7 +33,7 @@
   font-weight: 600;
 }
 
-.modePill[data-mode="manual"] {
+.modePill[data-mode="adjusted"] {
   background: rgba(193, 73, 83, 0.12);
   color: #8e2835;
 }

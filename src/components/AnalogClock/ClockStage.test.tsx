@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ClockStage } from "./ClockStage";
@@ -20,6 +20,9 @@ function EngineHarness({ settings }: { settings: ClockSettings }) {
     <>
       <output data-testid="mode">{clock.mode}</output>
       <output data-testid="time">{clock.formattedTime}</output>
+      <button type="button" onClick={clock.syncToNow}>
+        Sync test clock
+      </button>
       <ClockStage clock={clock} settings={settings} />
     </>
   );
@@ -212,7 +215,7 @@ describe("ClockStage", () => {
     }
   });
 
-  it("switches to manual mode when a draggable hand is dragged", async () => {
+  it("switches to adjusted mode when a draggable hand is dragged", async () => {
     const user = userEvent.setup();
     const { container } = render(<EngineHarness settings={DEFAULT_CLOCK_SETTINGS} />);
     const svg = container.querySelector("svg");
@@ -235,6 +238,92 @@ describe("ClockStage", () => {
 
     await user.pointer([{ target: minuteHitArea as Element, coords: { clientX: 100, clientY: 20 }, keys: "[MouseLeft>]" }]);
 
-    expect(screen.getByTestId("mode").textContent).toBe("manual");
+    expect(screen.getByTestId("mode").textContent).toBe("adjusted");
+  });
+
+  it("continues running from adjusted time after drag release", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 1, 10, 0, 0, 0));
+
+    try {
+      const { container } = render(<EngineHarness settings={DEFAULT_CLOCK_SETTINGS} />);
+      const svg = container.querySelector("svg");
+      const minuteHitArea = container.querySelector("[data-hand-hit-area='minute']");
+
+      expect(svg).not.toBeNull();
+      expect(minuteHitArea).not.toBeNull();
+
+      vi.spyOn(svg as SVGSVGElement, "getBoundingClientRect").mockReturnValue({
+        x: 0,
+        y: 0,
+        width: 200,
+        height: 200,
+        top: 0,
+        left: 0,
+        right: 200,
+        bottom: 200,
+        toJSON: () => ({}),
+      });
+
+      act(() => {
+        fireEvent.pointerDown(minuteHitArea as Element, { pointerId: 1, clientX: 100, clientY: 20 });
+        fireEvent.pointerUp(minuteHitArea as Element, { pointerId: 1, clientX: 100, clientY: 20 });
+      });
+
+      expect(screen.getByTestId("mode").textContent).toBe("adjusted");
+      expect(screen.getByTestId("time").textContent).toBe("10:00:00");
+
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
+
+      expect(screen.getByTestId("time").textContent).toBe("10:00:01");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("sync returns an adjusted clock to live real time", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 1, 10, 0, 0, 0));
+
+    try {
+      const { container } = render(<EngineHarness settings={DEFAULT_CLOCK_SETTINGS} />);
+      const svg = container.querySelector("svg");
+      const minuteHitArea = container.querySelector("[data-hand-hit-area='minute']");
+
+      expect(svg).not.toBeNull();
+      expect(minuteHitArea).not.toBeNull();
+
+      vi.spyOn(svg as SVGSVGElement, "getBoundingClientRect").mockReturnValue({
+        x: 0,
+        y: 0,
+        width: 200,
+        height: 200,
+        top: 0,
+        left: 0,
+        right: 200,
+        bottom: 200,
+        toJSON: () => ({}),
+      });
+
+      act(() => {
+        fireEvent.pointerDown(minuteHitArea as Element, { pointerId: 1, clientX: 100, clientY: 20 });
+        fireEvent.pointerUp(minuteHitArea as Element, { pointerId: 1, clientX: 100, clientY: 20 });
+      });
+
+      expect(screen.getByTestId("mode").textContent).toBe("adjusted");
+
+      vi.setSystemTime(new Date(2026, 0, 1, 12, 34, 56, 0));
+
+      act(() => {
+        fireEvent.click(screen.getByRole("button", { name: "Sync test clock" }));
+      });
+
+      expect(screen.getByTestId("mode").textContent).toBe("live");
+      expect(screen.getByTestId("time").textContent).toBe("12:34:56");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

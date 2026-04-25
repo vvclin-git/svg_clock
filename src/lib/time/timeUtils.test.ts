@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getShortestClockwiseDelta } from "../geometry/angle";
-import { totalMinutesToClockTime } from "./clockTime";
+import { addMillisecondsToClockTime, totalMinutesToClockTime } from "./clockTime";
 import { getHandAngles } from "./timeToAngle";
 
 describe("time helpers", () => {
@@ -28,6 +28,42 @@ describe("time helpers", () => {
       minutes: 55,
       seconds: 10,
       milliseconds: 0,
+    });
+  });
+
+  it("advances adjusted time across seconds, minutes, and midnight", () => {
+    expect(
+      addMillisecondsToClockTime(
+        {
+          hours: 10,
+          minutes: 59,
+          seconds: 59,
+          milliseconds: 900,
+        },
+        250,
+      ),
+    ).toEqual({
+      hours: 11,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 150,
+    });
+
+    expect(
+      addMillisecondsToClockTime(
+        {
+          hours: 23,
+          minutes: 59,
+          seconds: 59,
+          milliseconds: 800,
+        },
+        400,
+      ),
+    ).toEqual({
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 200,
     });
   });
 });

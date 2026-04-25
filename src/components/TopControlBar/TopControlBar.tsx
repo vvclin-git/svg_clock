@@ -15,7 +15,7 @@ export function TopControlBar({ onSync, mode, formattedTime }: TopControlBarProp
       <img className={styles.logo} src={fantasiaLogo} alt="SEIKO FANTASIA" />
       <div className={styles.actions}>
         <span className={styles.modePill} data-mode={mode}>
-          {mode === "live" ? "Live mode" : "Manual mode"}
+          {mode === "live" ? "Live mode" : "Adjusted mode"}
         </span>
         <div className={styles.digitalTime} aria-label="Digital time" aria-live="polite">
           {formattedTime}

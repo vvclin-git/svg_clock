@@ -1,4 +1,4 @@
-export type ClockMode = "live" | "manual";
+export type ClockMode = "live" | "adjusted";
 
 export type HandType = "hour" | "minute" | "second";
 

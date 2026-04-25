@@ -5,7 +5,13 @@ import { useHandDrag } from "./useHandDrag";
 import type { ClockMode, ClockTime, HandAngles, HandType } from "../types/clock";
 import type { ClockSettings } from "../types/settings";
 import type { DragState } from "../types/drag";
-import { dateToClockTime, normalizeClockTime, totalMinutes, totalMinutesToClockTime } from "../lib/time/clockTime";
+import {
+  addMillisecondsToClockTime,
+  dateToClockTime,
+  normalizeClockTime,
+  totalMinutes,
+  totalMinutesToClockTime,
+} from "../lib/time/clockTime";
 import { formatTime } from "../lib/time/formatTime";
 import { getHandAngles } from "../lib/time/timeToAngle";
 import { angleDeltaToMinuteDelta } from "../lib/time/angleToTime";
@@ -32,19 +38,32 @@ export function useClockEngine(_settings: ClockSettings): UseClockEngineResult {
   const [displayedTime, setDisplayedTime] = useState<ClockTime>(() => dateToClockTime(new Date()));
   const [dragState, setDragState] = useState<DragState>(DEFAULT_DRAG_STATE);
   const dragSessionRef = useRef<DragSession | null>(null);
+  const lastTickTimestampRef = useRef<number>(Date.now());
 
   const syncToNow = useCallback(() => {
     setDisplayedTime(dateToClockTime(new Date()));
     setMode("live");
     setDragState(DEFAULT_DRAG_STATE);
     dragSessionRef.current = null;
+    lastTickTimestampRef.current = Date.now();
   }, []);
 
   const tick = useCallback(() => {
-    setDisplayedTime(dateToClockTime(new Date()));
-  }, []);
+    const now = Date.now();
 
-  useClockTicker(mode === "live", tick);
+    if (mode === "live") {
+      setDisplayedTime(dateToClockTime(new Date(now)));
+      lastTickTimestampRef.current = now;
+      return;
+    }
+
+    const elapsedMilliseconds = now - lastTickTimestampRef.current;
+    lastTickTimestampRef.current = now;
+
+    setDisplayedTime((currentTime) => addMillisecondsToClockTime(currentTime, elapsedMilliseconds));
+  }, [mode]);
+
+  useClockTicker(!dragState.isDragging, tick);
 
   const beginDrag = useCallback(
     (hand: HandType, startAngle: number) => {
@@ -58,7 +77,7 @@ export function useClockEngine(_settings: ClockSettings): UseClockEngineResult {
         totalMinutesValue: totalMinutes(displayedTime),
       };
 
-      setMode("manual");
+      setMode("adjusted");
       setDragState({ isDragging: true, activeHand: hand });
     },
     [displayedTime],
@@ -86,6 +105,7 @@ export function useClockEngine(_settings: ClockSettings): UseClockEngineResult {
 
   const endDrag = useCallback(() => {
     dragSessionRef.current = null;
+    lastTickTimestampRef.current = Date.now();
     setDragState(DEFAULT_DRAG_STATE);
   }, []);
 
