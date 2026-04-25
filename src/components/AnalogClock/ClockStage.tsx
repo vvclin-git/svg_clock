@@ -10,7 +10,6 @@ import type {
 } from "../../types/scene";
 import { sceneRegistry } from "../../lib/assets/sceneRegistry";
 import { clockPolarToPoint } from "../../lib/geometry/polar";
-import { DigitalTimeDisplay } from "./DigitalTimeDisplay";
 import { HandHitArea } from "./HandHitArea";
 import styles from "./ClockStage.module.css";
 
@@ -283,7 +282,6 @@ export function ClockStage({ clock, settings }: ClockStageProps) {
           epochs={epochs}
         />
       </svg>
-      {settings.showDigitalTime ? <DigitalTimeDisplay value={clock.formattedTime} /> : null}
     </div>
   );
 }

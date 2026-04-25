@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 92" role="img" aria-labelledby="title">
+  <title id="title">SEIKO FANTASIA</title>
+  <text
+    x="170"
+    y="28"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="28"
+    font-weight="700"
+    letter-spacing="4"
+    fill="#061a33"
+  >
+    SEIKO
+  </text>
+  <text
+    x="170"
+    y="72"
+    text-anchor="middle"
+    font-family="'Times New Roman', Georgia, serif"
+    font-size="40"
+    font-weight="400"
+    letter-spacing="10"
+    fill="#c4ad6a"
+    stroke="#061a33"
+    stroke-width="0.8"
+    paint-order="stroke"
+  >
+    FANTASIA
+  </text>
+</svg>

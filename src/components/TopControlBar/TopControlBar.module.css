@@ -9,19 +9,11 @@
   backdrop-filter: blur(14px);
 }
 
-.eyebrow {
-  margin: 0 0 0.25rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
-.title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  font-weight: 600;
+.logo {
+  display: block;
+  width: clamp(12rem, 28vw, 18rem);
+  height: auto;
+  flex: 0 1 auto;
 }
 
 .actions {
@@ -46,40 +38,23 @@
   color: #8e2835;
 }
 
-.toggleButton {
+.digitalTime {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 7.75rem;
   height: 44px;
   padding: 0 1.1rem;
   border: 1px solid rgba(21, 50, 67, 0.2);
   border-radius: 999px;
-  background: rgba(255, 250, 241, 0.72);
-  color: var(--color-ink);
+  background: rgba(255, 250, 241, 0.82);
+  color: #153243;
+  font-family: var(--font-mono);
   font-size: 0.95rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
-  cursor: pointer;
   box-shadow: 0 10px 22px rgba(21, 50, 67, 0.08);
-  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
-}
-
-.toggleButton[aria-pressed="true"] {
-  border-color: rgba(21, 50, 67, 0.36);
-  background: rgba(21, 50, 67, 0.1);
-}
-
-.toggleButton:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 250, 241, 0.94);
-  box-shadow: 0 12px 24px rgba(21, 50, 67, 0.14);
-}
-
-.toggleButton:active {
-  transform: translateY(0);
-}
-
-.toggleButton:focus-visible {
-  outline: 3px solid rgba(40, 75, 99, 0.24);
-  outline-offset: 3px;
 }
 
 @media (max-width: 640px) {
@@ -90,5 +65,9 @@
   .actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .logo {
+    width: min(16rem, 78vw);
   }
 }
