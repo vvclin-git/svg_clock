@@ -1,17 +1,17 @@
-# Analog Clock Web App
+# SEIKO FANTASIA Clock Web App
 
-A browser-based analog clock built with Vite, React, TypeScript, and SVG. The app shows the device's current local time, lets the user drag the hour and minute hands to adjust the displayed time manually, and provides a `Sync` button to return to live mode.
+A browser-based Fantasia-style musical clock built with Vite, React, TypeScript, SVG, and raster image assets. The app shows local time, lets the user drag the hour and minute hands to set an adjusted time, continues running from that adjusted time, and provides a `Sync` button to return to real local time.
 
 ## Features
 
 - Live local-time display with hour, minute, and second hands
-- Manual time adjustment by dragging the hour or minute hand
+- Manual time adjustment by dragging the hour or minute hand, then continuing from the adjusted time
 - Wrap-safe drag behavior across the 12 o'clock boundary
-- Top control bar with mode display and `Sync` action
-- Digital time readout inside the clock face in `HH:MM:SS`
-- External SVG asset registry for interchangeable clock faces and hand styles
-- Custom `dual-ring` face with minute labels on the outer ring and full hour numerals on the inner ring
-- Per-hand positioning controls for horizontal, vertical, and radial tuning
+- Branded top control bar with mode display, digital `HH:MM:SS` readout, and `Sync` action
+- Scene-based asset registry for layered clockface, numerals, decorations, hands, and center-cap assets
+- Raster Fantasia clock assets with independently positioned numeral and hand layers
+- Polar coordinate positioning for easier circular numeral and decoration placement
+- Per-hand image sizing, anchor, pivot, hit-area, and animation configuration
 - Responsive layout for desktop and mobile
 - Pointer Events-based interaction for mouse and touch input
 
@@ -21,6 +21,7 @@ A browser-based analog clock built with Vite, React, TypeScript, and SVG. The ap
 - React
 - TypeScript
 - SVG
+- Raster image assets
 - CSS Modules
 - Vitest
 
@@ -62,6 +63,7 @@ public/
   favicon.svg
 src/
   assets/
+    fantasia/
     faces/
     hands/
   components/
@@ -82,58 +84,64 @@ src/
 
 ## Architecture Notes
 
-- `src/hooks/useClockEngine.ts` owns live/manual mode, current displayed time, hand angles, drag updates, and sync behavior.
+- `src/hooks/useClockEngine.ts` owns live/adjusted mode, current displayed time, hand angles, drag updates, adjusted ticking, and sync behavior.
 - `src/hooks/useHandDrag.ts` converts Pointer Events into drag lifecycle events for draggable hands.
 - `src/lib/time/` contains pure helpers for time conversion, formatting, and angle calculation.
-- `src/lib/assets/` maps logical face and hand style names to SVG assets.
-- `src/components/AnalogClock/` contains the layered clock face, hands, hit areas, center cap, and digital time display.
+- `src/lib/assets/sceneRegistry.ts` defines scene-level asset composition for faces, numerals, decorations, hands, and center-cap layers.
+- `src/components/AnalogClock/` contains the layered SVG scene renderer and hand hit areas.
+- `src/components/TopControlBar/` contains the branded header, digital time readout, mode label, and sync action.
 
-## Face and Hand Styles
+## Scene Assets
 
-Available face styles are defined in `src/types/settings.ts` and registered in `src/lib/assets/faceRegistry.ts`:
+Scene ids are defined in `src/types/scene.ts` and registered in `src/lib/assets/sceneRegistry.ts`.
 
-- `minimal`
-- `classic`
-- `roman`
-- `dual-ring`
+Available scenes:
 
-Available hand styles are defined in `src/types/settings.ts` and registered in `src/lib/assets/handRegistry.ts`:
+- `default`: legacy dual-ring SVG-based scene
+- `fantasia`: raster Fantasia musical clock scene
 
-- `bar`
-- `sword`
-- `breguet`
+Default scene selection is configured in `src/constants/clock.ts`.
 
-Default style selection is configured in `src/constants/clock.ts`.
+Each scene can define:
 
-## Hand Position Tuning
+- `clockface`: base dial/background images
+- `numerals`: independent hour numeral assets
+- `decorations`: logos, labels, jewels, plaques, or other static overlays
+- `hands`: hour, minute, and second image assets with per-hand interaction config
+- `center-cap`: topmost center decorative assets
 
-Each hand can be tuned independently in `src/constants/clock.ts`:
+## Asset Position Tuning
+
+Fantasia asset placement is tuned in `src/lib/assets/sceneRegistry.ts`.
+
+Numerals are generated with shared polar settings:
 
 ```ts
-export const CLOCK_HAND_DIMENSIONS = {
-  hour: { length: 26, width: 12, hitRadius: 13, offsetX: 0, offsetY: 0, radialOffset: 3 },
-  minute: { length: 37, width: 8, hitRadius: 11, offsetX: 0, offsetY: 0, radialOffset: 3 },
-  second: { length: 39, width: 4, hitRadius: 0, offsetX: 0, offsetY: 0, radialOffset: 3 },
-} as const;
+const FANTASIA_NUMERAL_RADIUS = 32;
+const FANTASIA_NUMERAL_SIZE = 15.2;
 ```
 
-Meaning of each tuning value:
+Meaning:
 
-- `offsetX`: move the hand left or right
-- `offsetY`: move the hand up or down in screen coordinates
-- `radialOffset`: move the hand inward or outward along its own axis
+- `radius`: moves numerals inward or outward from the center
+- `angle`: uses clock-style degrees where `0` is 12 o'clock, `90` is 3 o'clock, `180` is 6 o'clock, and `270` is 9 o'clock
+- `width` / `height`: controls rendered asset size in the `0 0 100 100` SVG viewBox
 
-Interpretation:
+Hands are tuned per asset with:
 
-- positive `radialOffset` moves the hand inward toward the center
-- negative `radialOffset` moves the hand outward away from the center
+- `x` / `y`: rotation pivot position, usually near `50, 50`
+- `width` / `height`: rendered hand size
+- `anchorX` / `anchorY`: pivot location inside the image
+- `interaction.hitLength` / `interaction.hitWidth`: invisible drag area
 
-The drag hit area is kept aligned with these values automatically.
+The drag hit area is kept separate from the visible hand image so decorative raster shapes do not reduce usability.
 
-## Current MVP Behavior
+## Current Behavior
 
 - The app starts in live mode and follows the device's local time.
-- Dragging the hour or minute hand switches the app into manual mode.
+- Dragging the hour or minute hand switches the app into adjusted mode.
+- The clock pauses while dragging for precise adjustment.
+- Releasing the hand continues ticking forward from the adjusted time.
 - The second hand is visible but not draggable.
 - Pressing `Sync` re-reads the device time and switches the app back to live mode.
 
@@ -141,7 +149,13 @@ The drag hit area is kept aligned with these values automatically.
 
 The project includes a GitHub Pages workflow at `.github/workflows/deploy-pages.yml`.
 
-For a repository published at `https://<user>.github.io/svg_clock/`:
+For this repository, the app is published at:
+
+```text
+https://vvclin-git.github.io/svg_clock/
+```
+
+Deployment details:
 
 - Vite is configured with `base: "/svg_clock/"`
 - GitHub Pages should be configured to use `GitHub Actions` as the source

@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-04-25
+
+### Added
+- Added a scene-based asset registry that supports layered clockface, numeral, decoration, hand, and center-cap assets.
+- Added the `fantasia` scene using raster clockface, numeral, and hand assets under `src/assets/fantasia/`.
+- Added polar positioning support for easier numeral and decoration placement around the clock face.
+- Added a branded `SEIKO FANTASIA` header logo and moved the digital time readout into the top control bar.
+- Added adjusted-time ticking behavior after manual hand dragging.
+
+### Changed
+- Set the Fantasia scene as the default clock appearance.
+- Replaced separate face and hand registries with a single scene registry.
+- Changed manual dragging so the clock pauses only while dragging, then continues running from the adjusted time.
+- Updated the top control mode label to show `Adjusted mode` until `Sync` returns the clock to real local time.
+- Unified top control button sizing and visual treatment.
+
+### Removed
+- Removed the old in-face digital time readout.
+- Removed the digital time toggle button.
+- Removed the legacy fixed `ClockFace`, `ClockHands`, and `ClockCenter` components in favor of layered scene rendering.
+
 ## [0.2.0] - 2026-03-25
 
 ### Added
