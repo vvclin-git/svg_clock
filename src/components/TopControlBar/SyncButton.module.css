@@ -1,12 +1,14 @@
 .button {
-  min-height: 44px;
-  padding: 0.75rem 1.15rem;
+  min-width: 7.75rem;
+  height: 44px;
+  padding: 0 1.1rem;
   border: 0;
   border-radius: 999px;
   background: linear-gradient(135deg, #153243, #284b63);
   color: #fffaf1;
   font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
   box-shadow: 0 10px 22px rgba(21, 50, 67, 0.2);

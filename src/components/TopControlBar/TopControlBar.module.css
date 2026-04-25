@@ -29,7 +29,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
 .modePill {
@@ -47,16 +47,19 @@
 }
 
 .toggleButton {
-  min-height: 44px;
-  padding: 0.72rem 1rem;
+  min-width: 7.75rem;
+  height: 44px;
+  padding: 0 1.1rem;
   border: 1px solid rgba(21, 50, 67, 0.2);
   border-radius: 999px;
   background: rgba(255, 250, 241, 0.72);
   color: var(--color-ink);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+  box-shadow: 0 10px 22px rgba(21, 50, 67, 0.08);
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .toggleButton[aria-pressed="true"] {
@@ -67,6 +70,7 @@
 .toggleButton:hover {
   transform: translateY(-1px);
   background: rgba(255, 250, 241, 0.94);
+  box-shadow: 0 12px 24px rgba(21, 50, 67, 0.14);
 }
 
 .toggleButton:active {
