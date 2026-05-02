@@ -7,6 +7,7 @@ const MILLISECONDS_PER_DAY = MINUTES_PER_DAY * 60 * 1000;
 export type ChimeScheduleEntry = {
   targetMinute: number;
   triggerMinute: number;
+  songId: string;
 };
 
 export type NextChimeEntry = ChimeScheduleEntry & {
@@ -52,8 +53,8 @@ export function getTargetMinutes(settings: ChimeSettings) {
     case "exactTimes":
       return Array.from(
         new Set(
-          settings.exactTargetTimes
-            .map(parseTimeStringToMinute)
+          settings.exactChimeEvents
+            .map((event) => parseTimeStringToMinute(event.time))
             .filter((minute): minute is number => minute !== null),
         ),
       ).sort((left, right) => left - right);
@@ -63,10 +64,30 @@ export function getTargetMinutes(settings: ChimeSettings) {
 export function getChimeSchedule(settings: ChimeSettings): ChimeScheduleEntry[] {
   const leadTime = Math.max(0, Math.min(MINUTES_PER_DAY - 1, Math.floor(settings.leadTimeMinutes)));
 
+  if (settings.scheduleMode === "exactTimes") {
+    return settings.exactChimeEvents
+      .map((event) => {
+        const targetMinute = parseTimeStringToMinute(event.time);
+
+        if (targetMinute === null) {
+          return null;
+        }
+
+        return {
+          targetMinute,
+          triggerMinute: wrapMinute(targetMinute - leadTime),
+          songId: event.songId || settings.songId,
+        };
+      })
+      .filter((entry): entry is ChimeScheduleEntry => entry !== null)
+      .sort((left, right) => left.triggerMinute - right.triggerMinute);
+  }
+
   return getTargetMinutes(settings)
     .map((targetMinute) => ({
       targetMinute,
       triggerMinute: wrapMinute(targetMinute - leadTime),
+      songId: settings.songId,
     }))
     .sort((left, right) => left.triggerMinute - right.triggerMinute);
 }

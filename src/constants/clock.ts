@@ -8,7 +8,11 @@ export const DEFAULT_CLOCK_SETTINGS: ClockSettings = {
     enabled: false,
     scheduleMode: "hourly",
     timesPerDay: 6,
-    exactTargetTimes: ["09:00", "12:00", "18:00"],
+    exactChimeEvents: [
+      { time: "09:00", songId: "grand-fathers-clock" },
+      { time: "12:00", songId: "grand-fathers-clock" },
+      { time: "18:00", songId: "grand-fathers-clock" },
+    ],
     leadTimeMinutes: 5,
     songId: "grand-fathers-clock",
   },

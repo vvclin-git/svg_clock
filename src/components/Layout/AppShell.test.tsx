@@ -63,7 +63,10 @@ describe("AppShell", () => {
     expect((screen.getByRole("combobox", { name: "Schedule" }) as HTMLSelectElement).value).toBe("exactTimes");
     expect((screen.getByRole("spinbutton", { name: "Lead time (min before)" }) as HTMLInputElement).value).toBe("12");
     expect((screen.getByRole("combobox", { name: "Song" }) as HTMLSelectElement).value).toBe("shoujyouji-xf");
-    expect((screen.getByLabelText("Exact target time 1") as HTMLInputElement).value).toBe("06:30");
+    const exactTimeInput = screen.getByLabelText("Exact target time 1") as HTMLInputElement;
+    expect(exactTimeInput.value).toBe("06:30");
+    expect(exactTimeInput.type).toBe("text");
+    expect((screen.getByRole("combobox", { name: "Exact target song 1" }) as HTMLSelectElement).value).toBe("shoujyouji-xf");
   });
 
   it("saves changed settings to local storage", async () => {
@@ -80,5 +83,25 @@ describe("AppShell", () => {
     };
 
     expect(savedSettings.chime?.songId).toBe("open-your-hand");
+  });
+
+  it("saves per-event songs for exact time rows", async () => {
+    const user = userEvent.setup();
+    render(<AppShell />);
+
+    await user.click(screen.getByRole("button", { name: "Settings" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Schedule" }), "exactTimes");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Exact target song 1" }), "shoujyouji-xf");
+
+    const savedSettings = JSON.parse(localStorage.getItem(CLOCK_SETTINGS_STORAGE_KEY) ?? "{}") as {
+      chime?: {
+        exactChimeEvents?: Array<{ time: string; songId: string }>;
+      };
+    };
+
+    expect(savedSettings.chime?.exactChimeEvents?.[0]).toEqual({
+      time: "09:00",
+      songId: "shoujyouji-xf",
+    });
   });
 });

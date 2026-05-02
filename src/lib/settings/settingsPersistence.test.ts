@@ -45,7 +45,10 @@ describe("settingsPersistence", () => {
         enabled: true,
         scheduleMode: "exactTimes",
         timesPerDay: 12,
-        exactTargetTimes: ["08:15", "21:45"],
+        exactChimeEvents: [
+          { time: "08:15", songId: "open-your-hand" },
+          { time: "21:45", songId: "shoujyouji-xf" },
+        ],
         leadTimeMinutes: 10,
         songId: "open-your-hand",
       },
@@ -71,7 +74,10 @@ describe("settingsPersistence", () => {
           enabled: "true",
           scheduleMode: "quarterly",
           timesPerDay: 99,
-          exactTargetTimes: ["25:00", "12:30", "12:30"],
+          exactChimeEvents: [
+            { time: "25:00", songId: "open-your-hand" },
+            { time: "12:30", songId: "missing-song" },
+          ],
           leadTimeMinutes: -20,
           songId: "missing-song",
         },
@@ -81,10 +87,24 @@ describe("settingsPersistence", () => {
       chime: {
         ...DEFAULT_CLOCK_SETTINGS.chime,
         timesPerDay: 24,
-        exactTargetTimes: ["12:30"],
+        exactChimeEvents: [{ time: "12:30", songId: DEFAULT_CLOCK_SETTINGS.chime.songId }],
         leadTimeMinutes: 0,
       },
     });
+  });
+
+  it("migrates old exact target times to exact chime events", () => {
+    expect(
+      normalizeClockSettings({
+        chime: {
+          songId: "open-your-hand",
+          exactTargetTimes: ["08:15", "21:45"],
+        },
+      }).chime.exactChimeEvents,
+    ).toEqual([
+      { time: "08:15", songId: "open-your-hand" },
+      { time: "21:45", songId: "open-your-hand" },
+    ]);
   });
 
   it("does not throw when storage read or write fails", () => {

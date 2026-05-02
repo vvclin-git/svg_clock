@@ -68,6 +68,7 @@
 
 .field select,
 .field input,
+.timeRow select,
 .timeRow input {
   width: 100%;
   min-height: 42px;
@@ -139,14 +140,20 @@
 
 .timeList {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.65rem;
 }
 
 .timeRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(7rem, 10rem) minmax(12rem, 1fr) auto;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.timeRow select,
+.timeRow input {
+  min-width: 0;
 }
 
 .timeRow button {
@@ -161,8 +168,7 @@
 }
 
 @media (max-width: 860px) {
-  .grid,
-  .timeList {
+  .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -175,6 +181,10 @@
 
   .grid,
   .timeList {
+    grid-template-columns: 1fr;
+  }
+
+  .timeRow {
     grid-template-columns: 1fr;
   }
 }

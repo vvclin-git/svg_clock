@@ -24,6 +24,7 @@ export type UseChimeSchedulerResult = {
   selectedSong: ChimeSong | null;
   nextTriggerLabel: string | null;
   nextTargetLabel: string | null;
+  nextSongLabel: string | null;
   playbackStatus: ChimePlaybackStatus;
   playSelectedSong: () => Promise<void>;
   unlockSelectedSong: () => Promise<void>;
@@ -46,6 +47,8 @@ export function useChimeScheduler({
   const nextChimeEntry = useMemo(() => getNextChimeEntry(displayedTime, settings), [displayedTime, settings]);
   const nextTriggerLabel = nextChimeEntry ? minuteToTimeString(nextChimeEntry.triggerMinute) : null;
   const nextTargetLabel = nextChimeEntry ? minuteToTimeString(nextChimeEntry.targetMinute) : null;
+  const nextSong = useMemo(() => getChimeSong(nextChimeEntry?.songId ?? ""), [nextChimeEntry?.songId]);
+  const nextSongLabel = nextSong?.label ?? null;
   const playSelectedSong = useCallback(async () => {
     const status = await playChimeSong(selectedSong);
     setPlaybackStatus(status);
@@ -81,13 +84,16 @@ export function useChimeScheduler({
       return;
     }
 
-    void playChimeSong(selectedSong).then(setPlaybackStatus);
+    const triggeredSong = getChimeSong(crossedEntries[0].songId) ?? selectedSong;
+
+    void playChimeSong(triggeredSong).then(setPlaybackStatus);
   }, [displayedTime, dragState.isDragging, mode, selectedSong, settings]);
 
   return {
     selectedSong,
     nextTriggerLabel,
     nextTargetLabel,
+    nextSongLabel,
     playbackStatus,
     playSelectedSong,
     unlockSelectedSong,

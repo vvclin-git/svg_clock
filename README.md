@@ -111,14 +111,17 @@ Available controls:
 - `Schedule`: chooses `Hourly`, `Times per day`, or `Exact times`
 - `Times per day`: creates evenly spaced target times across the day
 - `Lead time`: starts the chime before the target time by the configured number of minutes
-- `Song`: selects a registered chime song
-- `Exact target times`: edits target times when using exact-time scheduling
+- `Song`: selects the default registered chime song for hourly and times-per-day schedules
+- `Exact target times`: edits target times with 24-hour `HH:MM` text fields when using exact-time scheduling
+- `Exact target song`: selects the song for each exact-time chime event
 
 Chime target times are the intended clock times. Trigger times are calculated as `target time - lead time`; for example, a `10:00` target with a `5` minute lead time triggers at `09:55`.
 
 Chiming only triggers while the clock is in live mode and crosses a trigger time by itself. Dragging the hour or minute hand switches the clock into adjusted mode, and chiming stays disabled until `Sync` returns the clock to real local time.
 
 Clock settings are saved in the browser with `localStorage`, so each browser and device remembers its own chiming schedule, lead time, and selected song. This works with the static GitHub Pages deployment and does not sync settings between devices.
+
+Exact-time schedule rows can each use their own song. Hourly and times-per-day schedules use the default `Song` selector.
 
 The default chime is a pre-rendered browser audio asset registered in `src/lib/assets/chimeRegistry.ts`. Pressing `Test` plays the selected song immediately, and enabling chiming primes the selected audio element from the user's click so scheduled playback is less likely to be blocked by browser autoplay rules.
 

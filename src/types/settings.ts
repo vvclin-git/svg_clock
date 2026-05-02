@@ -2,11 +2,16 @@ import type { ClockSceneId } from "./scene";
 
 export type ChimeScheduleMode = "hourly" | "intervalCount" | "exactTimes";
 
+export type ExactChimeEvent = {
+  time: string;
+  songId: string;
+};
+
 export type ChimeSettings = {
   enabled: boolean;
   scheduleMode: ChimeScheduleMode;
   timesPerDay: number;
-  exactTargetTimes: string[];
+  exactChimeEvents: ExactChimeEvent[];
   leadTimeMinutes: number;
   songId: string;
 };

@@ -10,6 +10,7 @@ type ChimeSettingsPanelProps = {
   playbackStatus: ChimePlaybackStatus;
   nextTriggerLabel: string | null;
   nextTargetLabel: string | null;
+  nextSongLabel: string | null;
   onPrimeChime: () => Promise<void>;
   onTestChime: () => Promise<void>;
 };
@@ -24,6 +25,7 @@ export function ChimeSettingsPanel({
   playbackStatus,
   nextTriggerLabel,
   nextTargetLabel,
+  nextSongLabel,
   onPrimeChime,
   onTestChime,
 }: ChimeSettingsPanelProps) {
@@ -49,19 +51,33 @@ export function ChimeSettingsPanel({
     }
   };
 
-  const updateExactTime = (index: number, value: string) => {
+  const updateExactEventTime = (index: number, value: string) => {
     updateChime({
-      exactTargetTimes: settings.chime.exactTargetTimes.map((time, timeIndex) => (timeIndex === index ? value : time)),
+      exactChimeEvents: settings.chime.exactChimeEvents.map((event, eventIndex) =>
+        eventIndex === index ? { ...event, time: value } : event,
+      ),
+    });
+  };
+
+  const updateExactEventSong = (index: number, songId: string) => {
+    updateChime({
+      exactChimeEvents: settings.chime.exactChimeEvents.map((event, eventIndex) =>
+        eventIndex === index ? { ...event, songId } : event,
+      ),
     });
   };
 
   const addExactTime = () => {
-    updateChime({ exactTargetTimes: [...settings.chime.exactTargetTimes, "12:00"] });
+    updateChime({
+      exactChimeEvents: [...settings.chime.exactChimeEvents, { time: "12:00", songId: settings.chime.songId }],
+    });
   };
 
   const removeExactTime = (index: number) => {
-    const nextTimes = settings.chime.exactTargetTimes.filter((_, timeIndex) => timeIndex !== index);
-    updateChime({ exactTargetTimes: nextTimes.length > 0 ? nextTimes : ["12:00"] });
+    const nextEvents = settings.chime.exactChimeEvents.filter((_, eventIndex) => eventIndex !== index);
+    updateChime({
+      exactChimeEvents: nextEvents.length > 0 ? nextEvents : [{ time: "12:00", songId: settings.chime.songId }],
+    });
   };
 
   return (
@@ -75,7 +91,9 @@ export function ChimeSettingsPanel({
             </p>
             <p className={styles.nextChime}>
               {settings.chime.enabled && nextTriggerLabel
-                ? `Next trigger ${nextTriggerLabel}${nextTargetLabel && nextTargetLabel !== nextTriggerLabel ? ` for ${nextTargetLabel}` : ""}`
+                ? `Next trigger ${nextTriggerLabel}${nextTargetLabel && nextTargetLabel !== nextTriggerLabel ? ` for ${nextTargetLabel}` : ""}${
+                    nextSongLabel ? ` - ${nextSongLabel}` : ""
+                  }`
                 : "Chiming is disabled."}
             </p>
           </div>
@@ -154,15 +172,30 @@ export function ChimeSettingsPanel({
             </button>
           </div>
           <div className={styles.timeList}>
-            {settings.chime.exactTargetTimes.map((time, index) => (
-              <div className={styles.timeRow} key={`${time}-${index}`}>
+            {settings.chime.exactChimeEvents.map((event, index) => (
+              <div className={styles.timeRow} key={`${event.time}-${index}`}>
                 <input
                   aria-label={`Exact target time ${index + 1}`}
-                  type="time"
-                  value={time}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="([01][0-9]|2[0-3]):[0-5][0-9]"
+                  placeholder="HH:MM"
+                  value={event.time}
                   disabled={settings.chime.scheduleMode !== "exactTimes"}
-                  onChange={(event) => updateExactTime(index, event.target.value)}
+                  onChange={(changeEvent) => updateExactEventTime(index, changeEvent.target.value)}
                 />
+                <select
+                  aria-label={`Exact target song ${index + 1}`}
+                  value={event.songId}
+                  disabled={settings.chime.scheduleMode !== "exactTimes"}
+                  onChange={(changeEvent) => updateExactEventSong(index, changeEvent.target.value)}
+                >
+                  {chimeRegistry.map((song) => (
+                    <option key={song.id} value={song.id}>
+                      {song.label}
+                    </option>
+                  ))}
+                </select>
                 <button
                   type="button"
                   onClick={() => removeExactTime(index)}

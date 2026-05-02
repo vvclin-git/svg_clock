@@ -1,6 +1,6 @@
 import { DEFAULT_CLOCK_SETTINGS } from "../../constants/clock";
 import { chimeRegistry } from "../assets/chimeRegistry";
-import type { ClockSettings, ChimeScheduleMode } from "../../types/settings";
+import type { ClockSettings, ChimeScheduleMode, ExactChimeEvent } from "../../types/settings";
 import type { ClockSceneId } from "../../types/scene";
 
 export const CLOCK_SETTINGS_STORAGE_KEY = "svg-clock-settings-v1";
@@ -51,6 +51,32 @@ function normalizeSongId(value: unknown, fallback: string) {
   return chimeRegistry.some((song) => song.id === value) ? value : fallback;
 }
 
+function normalizeExactChimeEvents(chime: Record<string, unknown>, fallbackSongId: string): ExactChimeEvent[] {
+  if (Array.isArray(chime.exactChimeEvents)) {
+    const exactChimeEvents = chime.exactChimeEvents
+      .filter(isRecord)
+      .filter((event): event is { time: string; songId?: unknown } => typeof event.time === "string" && timePattern.test(event.time))
+      .map((event) => ({
+        time: event.time,
+        songId: normalizeSongId(event.songId, fallbackSongId),
+      }));
+
+    if (exactChimeEvents.length > 0) {
+      return exactChimeEvents;
+    }
+  }
+
+  const migratedTimes = normalizeExactTargetTimes(
+    chime.exactTargetTimes,
+    DEFAULT_CLOCK_SETTINGS.chime.exactChimeEvents.map((event) => event.time),
+  );
+
+  return migratedTimes.map((time) => ({
+    time,
+    songId: fallbackSongId,
+  }));
+}
+
 export function normalizeClockSettings(value: unknown): ClockSettings {
   const defaults = DEFAULT_CLOCK_SETTINGS;
 
@@ -62,6 +88,7 @@ export function normalizeClockSettings(value: unknown): ClockSettings {
   const scheduleMode = typeof chime.scheduleMode === "string" && scheduleModes.has(chime.scheduleMode as ChimeScheduleMode)
     ? (chime.scheduleMode as ChimeScheduleMode)
     : defaults.chime.scheduleMode;
+  const songId = normalizeSongId(chime.songId, defaults.chime.songId);
 
   return {
     showSecondHand: typeof value.showSecondHand === "boolean" ? value.showSecondHand : defaults.showSecondHand,
@@ -73,9 +100,9 @@ export function normalizeClockSettings(value: unknown): ClockSettings {
       enabled: typeof chime.enabled === "boolean" ? chime.enabled : defaults.chime.enabled,
       scheduleMode,
       timesPerDay: clampNumber(chime.timesPerDay, 1, 24, defaults.chime.timesPerDay),
-      exactTargetTimes: normalizeExactTargetTimes(chime.exactTargetTimes, defaults.chime.exactTargetTimes),
+      exactChimeEvents: normalizeExactChimeEvents(chime, songId),
       leadTimeMinutes: clampNumber(chime.leadTimeMinutes, 0, 1439, defaults.chime.leadTimeMinutes),
-      songId: normalizeSongId(chime.songId, defaults.chime.songId),
+      songId,
     },
   };
 }

@@ -21,9 +21,9 @@ const settings: ChimeSettings = {
   enabled: true,
   scheduleMode: "exactTimes",
   timesPerDay: 6,
-  exactTargetTimes: ["10:00"],
+  exactChimeEvents: [{ time: "10:00", songId: "open-your-hand" }],
   leadTimeMinutes: 5,
-  songId: "",
+  songId: "grand-fathers-clock",
 };
 
 const idleDragState: DragState = {
@@ -59,6 +59,7 @@ describe("useChimeScheduler", () => {
     rerender(<Harness time={{ hours: 9, minutes: 55, seconds: 0, milliseconds: 0 }} />);
 
     await waitFor(() => expect(playChimeSong).toHaveBeenCalledTimes(1));
+    expect(playChimeSong).toHaveBeenCalledWith(expect.objectContaining({ id: "open-your-hand" }));
   });
 
   it("does not repeat after the trigger has already been crossed", async () => {
