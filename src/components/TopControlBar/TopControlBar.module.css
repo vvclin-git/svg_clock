@@ -57,6 +57,36 @@
   box-shadow: 0 10px 22px rgba(21, 50, 67, 0.08);
 }
 
+.settingsButton {
+  min-width: 7.75rem;
+  height: 44px;
+  padding: 0 1.1rem;
+  border: 1px solid rgba(21, 50, 67, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 250, 241, 0.82);
+  color: #153243;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  box-shadow: 0 10px 22px rgba(21, 50, 67, 0.08);
+}
+
+.settingsButton:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.settingsButton:active {
+  transform: translateY(0);
+}
+
+.settingsButton:focus-visible {
+  outline: 3px solid rgba(40, 75, 99, 0.24);
+  outline-offset: 3px;
+}
+
 @media (max-width: 640px) {
   .bar {
     padding-inline: 1rem;

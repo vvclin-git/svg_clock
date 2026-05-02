@@ -1,0 +1,154 @@
+.panel {
+  border-bottom: 1px solid rgba(21, 50, 67, 0.14);
+  background: rgba(255, 250, 241, 0.62);
+}
+
+.inner {
+  display: grid;
+  gap: 1rem;
+  width: min(68rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1rem 0 1.25rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.title {
+  margin: 0;
+  color: #153243;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.status {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  color: #153243;
+  font-weight: 700;
+}
+
+.toggle input {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  color: #153243;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.field select,
+.field input,
+.timeRow input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(21, 50, 67, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.88);
+  color: #153243;
+  font: inherit;
+  font-weight: 600;
+  padding: 0 0.75rem;
+}
+
+.field input:disabled,
+.timeRow input:disabled {
+  opacity: 0.55;
+}
+
+.exactTimes {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.exactTimes[data-disabled="true"] {
+  opacity: 0.68;
+}
+
+.exactTimesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #153243;
+  font-weight: 700;
+}
+
+.exactTimesHeader button,
+.timeRow button {
+  min-height: 38px;
+  border: 1px solid rgba(21, 50, 67, 0.2);
+  border-radius: 8px;
+  background: #fffaf1;
+  color: #153243;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.exactTimesHeader button {
+  min-width: 5.5rem;
+}
+
+.timeList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.timeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+.timeRow button {
+  padding: 0 0.75rem;
+}
+
+.exactTimesHeader button:disabled,
+.timeRow button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 860px) {
+  .grid,
+  .timeList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .grid,
+  .timeList {
+    grid-template-columns: 1fr;
+  }
+}
