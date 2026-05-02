@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-05-02
+
+### Added
+- Added a chiming settings panel opened from the top control bar.
+- Added hourly, evenly spaced times-per-day, and exact-time chiming schedule options.
+- Added configurable chime lead time so a chime can start before the target time.
+- Added a chime song registry scaffold with `.mid` and `.midi` asset typing.
+- Added schedule and trigger tests covering lead-time wrapping, live-mode triggering, adjusted-mode suppression, and drag suppression.
+
+### Changed
+- Moved clock settings from hardcoded app usage into React state so settings controls can update the running clock.
+- Chiming is limited to live mode and remains disabled after manual hand adjustment until `Sync` returns the clock to real local time.
+
+### Notes
+- MIDI song selection is registry-ready, but direct MIDI playback is intentionally unsupported until a MIDI playback library or converted audio assets are added.
+
 ## [0.3.0] - 2026-04-25
 
 ### Added

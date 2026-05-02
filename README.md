@@ -7,7 +7,10 @@ A browser-based Fantasia-style musical clock built with Vite, React, TypeScript,
 - Live local-time display with hour, minute, and second hands
 - Manual time adjustment by dragging the hour or minute hand, then continuing from the adjusted time
 - Wrap-safe drag behavior across the 12 o'clock boundary
-- Branded top control bar with mode display, digital `HH:MM:SS` readout, and `Sync` action
+- Branded top control bar with mode display, digital `HH:MM:SS` readout, settings access, and `Sync` action
+- Chiming settings panel with hourly, times-per-day, and exact-time schedule modes
+- Configurable chime lead time, such as starting 5 minutes before the next hour
+- Chime song registry scaffold with MIDI asset typing for prepared `.mid` and `.midi` files
 - Scene-based asset registry for layered clockface, numerals, decorations, hands, and center-cap assets
 - Raster Fantasia clock assets with independently positioned numeral and hand layers
 - Polar coordinate positioning for easier circular numeral and decoration placement
@@ -69,11 +72,13 @@ src/
   components/
     AnalogClock/
     Layout/
+    Settings/
     TopControlBar/
   constants/
   hooks/
   lib/
     assets/
+    chime/
     geometry/
     time/
   styles/
@@ -85,11 +90,34 @@ src/
 ## Architecture Notes
 
 - `src/hooks/useClockEngine.ts` owns live/adjusted mode, current displayed time, hand angles, drag updates, adjusted ticking, and sync behavior.
+- `src/hooks/useChimeScheduler.ts` watches the displayed clock time and triggers chimes only during natural live-mode crossings.
 - `src/hooks/useHandDrag.ts` converts Pointer Events into drag lifecycle events for draggable hands.
+- `src/lib/chime/` contains pure helpers for schedule generation, lead-time subtraction, trigger crossing detection, and playback adaptation.
 - `src/lib/time/` contains pure helpers for time conversion, formatting, and angle calculation.
 - `src/lib/assets/sceneRegistry.ts` defines scene-level asset composition for faces, numerals, decorations, hands, and center-cap layers.
+- `src/lib/assets/chimeRegistry.ts` is the registry for selectable chime songs.
 - `src/components/AnalogClock/` contains the layered SVG scene renderer and hand hit areas.
-- `src/components/TopControlBar/` contains the branded header, digital time readout, mode label, and sync action.
+- `src/components/Settings/` contains the chiming settings panel.
+- `src/components/TopControlBar/` contains the branded header, digital time readout, mode label, settings action, and sync action.
+
+## Chiming Settings
+
+Open `Settings` from the top control bar to configure chiming.
+
+Available controls:
+
+- `Enabled`: turns chiming on or off
+- `Schedule`: chooses `Hourly`, `Times per day`, or `Exact times`
+- `Times per day`: creates evenly spaced target times across the day
+- `Lead time`: starts the chime before the target time by the configured number of minutes
+- `Song`: selects a registered chime song
+- `Exact target times`: edits target times when using exact-time scheduling
+
+Chime target times are the intended clock times. Trigger times are calculated as `target time - lead time`; for example, a `10:00` target with a `5` minute lead time triggers at `09:55`.
+
+Chiming only triggers while the clock is in live mode and crosses a trigger time by itself. Dragging the hour or minute hand switches the clock into adjusted mode, and chiming stays disabled until `Sync` returns the clock to real local time.
+
+MIDI files are supported at the registry and TypeScript asset level. Direct browser MIDI playback is not implemented yet, so prepared MIDI songs should either be converted to browser audio files later or played through a future MIDI playback adapter.
 
 ## Scene Assets
 
@@ -144,6 +172,7 @@ The drag hit area is kept separate from the visible hand image so decorative ras
 - Releasing the hand continues ticking forward from the adjusted time.
 - The second hand is visible but not draggable.
 - Pressing `Sync` re-reads the device time and switches the app back to live mode.
+- Chiming only triggers in live mode when the clock naturally crosses a scheduled trigger time.
 
 ## GitHub Pages Deployment
 
