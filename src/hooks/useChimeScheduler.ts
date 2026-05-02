@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ClockMode, ClockTime } from "../types/clock";
 import type { ChimePlaybackStatus, ChimeSong } from "../types/chime";
 import type { ChimeSettings } from "../types/settings";
 import type { DragState } from "../types/drag";
 import { getChimeSong } from "../lib/assets/chimeRegistry";
 import { getChimeSchedule, getCrossedChimeEntries, minuteToTimeString } from "../lib/chime/chimeSchedule";
-import { playChimeSong } from "../lib/chime/chimePlayback";
+import { playChimeSong, unlockChimeSong } from "../lib/chime/chimePlayback";
 
 type UseChimeSchedulerArgs = {
   settings: ChimeSettings;
@@ -24,6 +24,8 @@ export type UseChimeSchedulerResult = {
   selectedSong: ChimeSong | null;
   nextTriggerLabel: string | null;
   playbackStatus: ChimePlaybackStatus;
+  playSelectedSong: () => Promise<void>;
+  unlockSelectedSong: () => Promise<void>;
 };
 
 const idleStatus: ChimePlaybackStatus = {
@@ -42,6 +44,14 @@ export function useChimeScheduler({
   const selectedSong = useMemo(() => getChimeSong(settings.songId), [settings.songId]);
   const schedule = useMemo(() => getChimeSchedule(settings), [settings]);
   const nextTriggerLabel = schedule[0] ? minuteToTimeString(schedule[0].triggerMinute) : null;
+  const playSelectedSong = useCallback(async () => {
+    const status = await playChimeSong(selectedSong);
+    setPlaybackStatus(status);
+  }, [selectedSong]);
+  const unlockSelectedSong = useCallback(async () => {
+    const status = await unlockChimeSong(selectedSong);
+    setPlaybackStatus(status);
+  }, [selectedSong]);
 
   useEffect(() => {
     const previous = previousRef.current;
@@ -76,5 +86,7 @@ export function useChimeScheduler({
     selectedSong,
     nextTriggerLabel,
     playbackStatus,
+    playSelectedSong,
+    unlockSelectedSong,
   };
 }

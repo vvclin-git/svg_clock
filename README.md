@@ -10,7 +10,8 @@ A browser-based Fantasia-style musical clock built with Vite, React, TypeScript,
 - Branded top control bar with mode display, digital `HH:MM:SS` readout, settings access, and `Sync` action
 - Chiming settings panel with hourly, times-per-day, and exact-time schedule modes
 - Configurable chime lead time, such as starting 5 minutes before the next hour
-- Chime song registry scaffold with MIDI asset typing for prepared `.mid` and `.midi` files
+- Chime song registry with a bundled browser audio chime for static GitHub Pages playback
+- MIDI asset typing for source `.mid` and `.midi` files that can be rendered into browser audio assets
 - Scene-based asset registry for layered clockface, numerals, decorations, hands, and center-cap assets
 - Raster Fantasia clock assets with independently positioned numeral and hand layers
 - Polar coordinate positioning for easier circular numeral and decoration placement
@@ -117,7 +118,11 @@ Chime target times are the intended clock times. Trigger times are calculated as
 
 Chiming only triggers while the clock is in live mode and crosses a trigger time by itself. Dragging the hour or minute hand switches the clock into adjusted mode, and chiming stays disabled until `Sync` returns the clock to real local time.
 
-MIDI files are supported at the registry and TypeScript asset level. Direct browser MIDI playback is not implemented yet, so prepared MIDI songs should either be converted to browser audio files later or played through a future MIDI playback adapter.
+Clock settings are saved in the browser with `localStorage`, so each browser and device remembers its own chiming schedule, lead time, and selected song. This works with the static GitHub Pages deployment and does not sync settings between devices.
+
+The default chime is a pre-rendered browser audio asset registered in `src/lib/assets/chimeRegistry.ts`. Pressing `Test` plays the selected song immediately, and enabling chiming primes the selected audio element from the user's click so scheduled playback is less likely to be blocked by browser autoplay rules.
+
+MIDI files are supported at the TypeScript asset level for source material. Source MIDI files can live under `src/assets/chimes/source/`; generated browser-ready files should live beside them in `src/assets/chimes/` and be registered as `assetKind: "audio"`. Direct browser MIDI playback is intentionally not used for GitHub Pages. MIDI registry entries remain unsupported until a future MIDI playback adapter is added.
 
 ## Scene Assets
 

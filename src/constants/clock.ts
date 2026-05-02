@@ -10,7 +10,7 @@ export const DEFAULT_CLOCK_SETTINGS: ClockSettings = {
     timesPerDay: 6,
     exactTargetTimes: ["09:00", "12:00", "18:00"],
     leadTimeMinutes: 5,
-    songId: "",
+    songId: "grand-fathers-clock",
   },
 };
 

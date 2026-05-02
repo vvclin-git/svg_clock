@@ -19,3 +19,6 @@ Thumbs.db
 
 coverage/
 *.tsbuildinfo
+
+tools/
+src/assets/chimes/*.wav

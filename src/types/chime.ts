@@ -13,6 +13,11 @@ export type ChimePlaybackStatus =
       message: string;
     }
   | {
+      state: "ready";
+      message: string;
+      songId: string;
+    }
+  | {
       state: "played";
       message: string;
       songId: string;

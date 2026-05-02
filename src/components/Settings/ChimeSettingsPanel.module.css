@@ -73,6 +73,24 @@
   padding: 0 0.75rem;
 }
 
+.songControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+.songControls button {
+  min-width: 4.5rem;
+  min-height: 42px;
+  border: 1px solid rgba(21, 50, 67, 0.2);
+  border-radius: 8px;
+  background: #fffaf1;
+  color: #153243;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .field input:disabled,
 .timeRow input:disabled {
   opacity: 0.55;
@@ -129,7 +147,8 @@
 }
 
 .exactTimesHeader button:disabled,
-.timeRow button:disabled {
+.timeRow button:disabled,
+.songControls button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }

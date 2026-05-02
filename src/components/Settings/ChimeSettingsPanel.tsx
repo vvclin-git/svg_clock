@@ -8,13 +8,21 @@ type ChimeSettingsPanelProps = {
   settings: ClockSettings;
   onSettingsChange: (settings: ClockSettings) => void;
   playbackStatus: ChimePlaybackStatus;
+  onPrimeChime: () => Promise<void>;
+  onTestChime: () => Promise<void>;
 };
 
 function clampNumber(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-export function ChimeSettingsPanel({ settings, onSettingsChange, playbackStatus }: ChimeSettingsPanelProps) {
+export function ChimeSettingsPanel({
+  settings,
+  onSettingsChange,
+  playbackStatus,
+  onPrimeChime,
+  onTestChime,
+}: ChimeSettingsPanelProps) {
   const updateChime = (partialSettings: Partial<ClockSettings["chime"]>) => {
     onSettingsChange({
       ...settings,
@@ -27,6 +35,14 @@ export function ChimeSettingsPanel({ settings, onSettingsChange, playbackStatus 
 
   const updateScheduleMode = (event: ChangeEvent<HTMLSelectElement>) => {
     updateChime({ scheduleMode: event.target.value as ChimeScheduleMode });
+  };
+
+  const updateEnabled = (event: ChangeEvent<HTMLInputElement>) => {
+    updateChime({ enabled: event.target.checked });
+
+    if (event.target.checked) {
+      void onPrimeChime();
+    }
   };
 
   const updateExactTime = (index: number, value: string) => {
@@ -58,7 +74,7 @@ export function ChimeSettingsPanel({ settings, onSettingsChange, playbackStatus 
             <input
               type="checkbox"
               checked={settings.chime.enabled}
-              onChange={(event) => updateChime({ enabled: event.target.checked })}
+              onChange={updateEnabled}
             />
             <span>Enabled</span>
           </label>
@@ -101,14 +117,23 @@ export function ChimeSettingsPanel({ settings, onSettingsChange, playbackStatus 
 
           <label className={styles.field}>
             <span>Song</span>
-            <select value={settings.chime.songId} onChange={(event) => updateChime({ songId: event.target.value })}>
-              <option value="">No song registered</option>
-              {chimeRegistry.map((song) => (
-                <option key={song.id} value={song.id}>
-                  {song.label}
-                </option>
-              ))}
-            </select>
+            <div className={styles.songControls}>
+              <select
+                aria-label="Song"
+                value={settings.chime.songId}
+                onChange={(event) => updateChime({ songId: event.target.value })}
+              >
+                <option value="">No song registered</option>
+                {chimeRegistry.map((song) => (
+                  <option key={song.id} value={song.id}>
+                    {song.label}
+                  </option>
+                ))}
+              </select>
+              <button type="button" onClick={() => void onTestChime()} disabled={!settings.chime.songId}>
+                Test
+              </button>
+            </div>
           </label>
         </div>
 
