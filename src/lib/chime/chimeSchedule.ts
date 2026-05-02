@@ -9,6 +9,10 @@ export type ChimeScheduleEntry = {
   triggerMinute: number;
 };
 
+export type NextChimeEntry = ChimeScheduleEntry & {
+  minutesUntilTrigger: number;
+};
+
 function wrapMinute(value: number) {
   return ((value % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
 }
@@ -92,6 +96,23 @@ export function getCrossedChimeEntries(
   return getChimeSchedule(settings).filter((entry) =>
     crossedDailyMinute(previousMilliseconds, currentMilliseconds, entry.triggerMinute),
   );
+}
+
+export function getNextChimeEntry(currentTime: ClockTime, settings: ChimeSettings): NextChimeEntry | null {
+  const schedule = getChimeSchedule(settings);
+
+  if (schedule.length === 0) {
+    return null;
+  }
+
+  const currentMinute = Math.floor(clockTimeToMilliseconds(currentTime) / 60000);
+
+  return schedule
+    .map((entry) => ({
+      ...entry,
+      minutesUntilTrigger: wrapMinute(entry.triggerMinute - currentMinute),
+    }))
+    .sort((left, right) => left.minutesUntilTrigger - right.minutesUntilTrigger)[0];
 }
 
 export { MILLISECONDS_PER_DAY };

@@ -8,6 +8,8 @@ type ChimeSettingsPanelProps = {
   settings: ClockSettings;
   onSettingsChange: (settings: ClockSettings) => void;
   playbackStatus: ChimePlaybackStatus;
+  nextTriggerLabel: string | null;
+  nextTargetLabel: string | null;
   onPrimeChime: () => Promise<void>;
   onTestChime: () => Promise<void>;
 };
@@ -20,6 +22,8 @@ export function ChimeSettingsPanel({
   settings,
   onSettingsChange,
   playbackStatus,
+  nextTriggerLabel,
+  nextTargetLabel,
   onPrimeChime,
   onTestChime,
 }: ChimeSettingsPanelProps) {
@@ -69,6 +73,11 @@ export function ChimeSettingsPanel({
             <p className={styles.status} aria-live="polite">
               {playbackStatus.message}
             </p>
+            <p className={styles.nextChime}>
+              {settings.chime.enabled && nextTriggerLabel
+                ? `Next trigger ${nextTriggerLabel}${nextTargetLabel && nextTargetLabel !== nextTriggerLabel ? ` for ${nextTargetLabel}` : ""}`
+                : "Chiming is disabled."}
+            </p>
           </div>
           <label className={styles.toggle}>
             <input
@@ -104,7 +113,7 @@ export function ChimeSettingsPanel({
           </label>
 
           <label className={styles.field}>
-            <span>Lead time</span>
+            <span>Lead time (min before)</span>
             <input
               type="number"
               min="0"

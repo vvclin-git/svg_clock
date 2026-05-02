@@ -61,7 +61,7 @@ describe("AppShell", () => {
 
     expect((screen.getByRole("checkbox", { name: "Enabled" }) as HTMLInputElement).checked).toBe(true);
     expect((screen.getByRole("combobox", { name: "Schedule" }) as HTMLSelectElement).value).toBe("exactTimes");
-    expect((screen.getByRole("spinbutton", { name: "Lead time" }) as HTMLInputElement).value).toBe("12");
+    expect((screen.getByRole("spinbutton", { name: "Lead time (min before)" }) as HTMLInputElement).value).toBe("12");
     expect((screen.getByRole("combobox", { name: "Song" }) as HTMLSelectElement).value).toBe("shoujyouji-xf");
     expect((screen.getByLabelText("Exact target time 1") as HTMLInputElement).value).toBe("06:30");
   });

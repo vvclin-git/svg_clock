@@ -31,6 +31,13 @@
   font-size: 0.9rem;
 }
 
+.nextChime {
+  margin: 0.2rem 0 0;
+  color: #153243;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .toggle {
   display: inline-flex;
   align-items: center;

@@ -37,6 +37,8 @@ export function AppShell() {
           settings={settings}
           onSettingsChange={setSettings}
           playbackStatus={chime.playbackStatus}
+          nextTriggerLabel={chime.nextTriggerLabel}
+          nextTargetLabel={chime.nextTargetLabel}
           onPrimeChime={chime.unlockSelectedSong}
           onTestChime={chime.playSelectedSong}
         />

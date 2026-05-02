@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { ChimeSettings } from "../../types/settings";
-import { getChimeSchedule, getCrossedChimeEntries, getTargetMinutes, minuteToTimeString } from "./chimeSchedule";
+import {
+  getChimeSchedule,
+  getCrossedChimeEntries,
+  getNextChimeEntry,
+  getTargetMinutes,
+  minuteToTimeString,
+} from "./chimeSchedule";
 
 const baseSettings: ChimeSettings = {
   enabled: true,
@@ -51,5 +57,31 @@ describe("chimeSchedule", () => {
 
     expect(crossed).toHaveLength(1);
     expect(repeated).toHaveLength(0);
+  });
+
+  it("finds the next upcoming trigger relative to the current clock time", () => {
+    const nextEntry = getNextChimeEntry(
+      { hours: 9, minutes: 54, seconds: 30, milliseconds: 0 },
+      { ...baseSettings, scheduleMode: "exactTimes", exactTargetTimes: ["09:00", "10:00"], leadTimeMinutes: 5 },
+    );
+
+    expect(nextEntry).toMatchObject({
+      targetMinute: 600,
+      triggerMinute: 595,
+    });
+    expect(nextEntry?.minutesUntilTrigger).toBe(1);
+  });
+
+  it("wraps the next upcoming trigger across midnight", () => {
+    const nextEntry = getNextChimeEntry(
+      { hours: 23, minutes: 58, seconds: 0, milliseconds: 0 },
+      { ...baseSettings, scheduleMode: "exactTimes", exactTargetTimes: ["00:00"], leadTimeMinutes: 0 },
+    );
+
+    expect(nextEntry).toMatchObject({
+      targetMinute: 0,
+      triggerMinute: 0,
+      minutesUntilTrigger: 2,
+    });
   });
 });
