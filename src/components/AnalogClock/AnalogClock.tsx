@@ -6,12 +6,13 @@ import styles from "./AnalogClock.module.css";
 type AnalogClockProps = {
   clock: UseClockEngineResult;
   settings: ClockSettings;
+  visualActionEpoch?: number;
 };
 
-export function AnalogClock({ clock, settings }: AnalogClockProps) {
+export function AnalogClock({ clock, settings, visualActionEpoch = 0 }: AnalogClockProps) {
   return (
     <section className={styles.wrapper} aria-label="Analog clock">
-      <ClockStage clock={clock} settings={settings} />
+      <ClockStage clock={clock} settings={settings} visualActionEpoch={visualActionEpoch} />
     </section>
   );
 }

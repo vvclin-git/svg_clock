@@ -33,7 +33,7 @@ describe("ClockStage", () => {
     const { container } = render(<EngineHarness settings={DEFAULT_CLOCK_SETTINGS} />);
     const layers = Array.from(container.querySelectorAll("[data-layer]")).map((node) => node.getAttribute("data-layer"));
 
-    expect(layers).toEqual(["clockface", "numerals", "decorations", "hands", "center-cap"]);
+    expect(layers).toEqual(["clockface", "characters", "numerals", "decorations", "hands", "center-cap"]);
   });
 
   it("can render a scene with raster assets in every category", () => {
@@ -51,6 +51,20 @@ describe("ClockStage", () => {
           anchorX: 0.5,
           anchorY: 0.5,
           zSlot: "clockface",
+        },
+      ],
+      characters: [
+        {
+          id: "character-1",
+          src: rasterPixel,
+          hourIndex: 1,
+          x: 50,
+          y: 16,
+          width: 8,
+          height: 8,
+          anchorX: 0.5,
+          anchorY: 0.5,
+          zSlot: "characters",
         },
       ],
       numerals: [
@@ -121,7 +135,8 @@ describe("ClockStage", () => {
       const { container } = render(<EngineHarness settings={defaultSceneSettings} />);
       const images = container.querySelectorAll("image");
 
-      expect(images).toHaveLength(5);
+      expect(images).toHaveLength(6);
+      expect(container.querySelector("[data-element-id='character-1']")).not.toBeNull();
       expect(container.querySelector("[data-element-id='numeral-1']")).not.toBeNull();
       expect(container.querySelector("[data-element-id='decoration-1']")).not.toBeNull();
       expect(container.querySelector("[data-element-id='hour']")).not.toBeNull();
@@ -134,6 +149,7 @@ describe("ClockStage", () => {
     const originalScene = sceneRegistry.default;
     sceneRegistry.default = {
       ...originalScene,
+      characters: [],
       numerals: [
         {
           id: "hidden-numeral",
@@ -164,6 +180,24 @@ describe("ClockStage", () => {
     const originalScene = sceneRegistry.default;
     sceneRegistry.default = {
       ...originalScene,
+      characters: [
+        {
+          id: "polar-character",
+          src: rasterPixel,
+          hourIndex: 12,
+          x: 0,
+          y: 0,
+          polar: {
+            angle: 0,
+            radius: 40,
+          },
+          width: 8,
+          height: 8,
+          anchorX: 0.5,
+          anchorY: 0.5,
+          zSlot: "characters",
+        },
+      ],
       numerals: [
         {
           id: "polar-numeral",
@@ -206,9 +240,11 @@ describe("ClockStage", () => {
     try {
       const { container } = render(<EngineHarness settings={defaultSceneSettings} />);
       const numeral = container.querySelector("[data-element-id='polar-numeral']");
+      const character = container.querySelector("[data-element-id='polar-character']");
       const decoration = container.querySelector("[data-element-id='polar-logo']");
 
       expect(numeral?.getAttribute("transform")).toContain("translate(50 10)");
+      expect(character?.getAttribute("transform")).toContain("translate(50 10)");
       expect(decoration?.getAttribute("transform")).toContain("translate(70 50)");
     } finally {
       sceneRegistry.default = originalScene;

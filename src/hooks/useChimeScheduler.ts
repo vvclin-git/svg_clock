@@ -26,6 +26,7 @@ export type UseChimeSchedulerResult = {
   nextTargetLabel: string | null;
   nextSongLabel: string | null;
   playbackStatus: ChimePlaybackStatus;
+  visualActionEpoch: number;
   playSelectedSong: () => Promise<void>;
   unlockSelectedSong: () => Promise<void>;
 };
@@ -43,6 +44,7 @@ export function useChimeScheduler({
 }: UseChimeSchedulerArgs): UseChimeSchedulerResult {
   const previousRef = useRef<PreviousClockState | null>(null);
   const [playbackStatus, setPlaybackStatus] = useState<ChimePlaybackStatus>(idleStatus);
+  const [visualActionEpoch, setVisualActionEpoch] = useState(0);
   const selectedSong = useMemo(() => getChimeSong(settings.songId), [settings.songId]);
   const nextChimeEntry = useMemo(() => getNextChimeEntry(displayedTime, settings), [displayedTime, settings]);
   const nextTriggerLabel = nextChimeEntry ? minuteToTimeString(nextChimeEntry.triggerMinute) : null;
@@ -50,6 +52,7 @@ export function useChimeScheduler({
   const nextSong = useMemo(() => getChimeSong(nextChimeEntry?.songId ?? ""), [nextChimeEntry?.songId]);
   const nextSongLabel = nextSong?.label ?? null;
   const playSelectedSong = useCallback(async () => {
+    setVisualActionEpoch((epoch) => epoch + 1);
     const status = await playChimeSong(selectedSong);
     setPlaybackStatus(status);
   }, [selectedSong]);
@@ -86,6 +89,7 @@ export function useChimeScheduler({
 
     const triggeredSong = getChimeSong(crossedEntries[0].songId) ?? selectedSong;
 
+    setVisualActionEpoch((epoch) => epoch + 1);
     void playChimeSong(triggeredSong).then(setPlaybackStatus);
   }, [displayedTime, dragState.isDragging, mode, selectedSong, settings]);
 
@@ -95,6 +99,7 @@ export function useChimeScheduler({
     nextTargetLabel,
     nextSongLabel,
     playbackStatus,
+    visualActionEpoch,
     playSelectedSong,
     unlockSelectedSong,
   };

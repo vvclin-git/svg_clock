@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useChimeScheduler } from "./useChimeScheduler";
 import type { ClockMode, ClockTime } from "../types/clock";
@@ -15,6 +15,7 @@ const playChimeSong = vi.fn<(song: unknown) => Promise<{ state: "error"; message
 
 vi.mock("../lib/chime/chimePlayback", () => ({
   playChimeSong: (song: unknown) => playChimeSong(song),
+  unlockChimeSong: (song: unknown) => playChimeSong(song),
 }));
 
 const settings: ChimeSettings = {
@@ -38,14 +39,21 @@ type HarnessProps = {
 };
 
 function Harness({ time, mode = "live", dragState = idleDragState }: HarnessProps) {
-  useChimeScheduler({
+  const chime = useChimeScheduler({
     settings,
     displayedTime: time,
     mode,
     dragState,
   });
 
-  return null;
+  return (
+    <>
+      <output data-testid="visual-action-epoch">{chime.visualActionEpoch}</output>
+      <button type="button" onClick={() => void chime.playSelectedSong()}>
+        Test chime
+      </button>
+    </>
+  );
 }
 
 describe("useChimeScheduler", () => {
@@ -60,6 +68,17 @@ describe("useChimeScheduler", () => {
 
     await waitFor(() => expect(playChimeSong).toHaveBeenCalledTimes(1));
     expect(playChimeSong).toHaveBeenCalledWith(expect.objectContaining({ id: "open-your-hand" }));
+    expect(screen.getByTestId("visual-action-epoch").textContent).toBe("1");
+  });
+
+  it("starts visual action when manually testing the selected song", async () => {
+    render(<Harness time={{ hours: 9, minutes: 54, seconds: 59, milliseconds: 900 }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Test chime" }));
+
+    await waitFor(() => expect(playChimeSong).toHaveBeenCalledTimes(1));
+    expect(playChimeSong).toHaveBeenCalledWith(expect.objectContaining({ id: "grand-fathers-clock" }));
+    expect(screen.getByTestId("visual-action-epoch").textContent).toBe("1");
   });
 
   it("does not repeat after the trigger has already been crossed", async () => {

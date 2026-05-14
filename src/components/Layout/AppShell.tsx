@@ -45,7 +45,7 @@ export function AppShell() {
         />
       ) : null}
       <main className={styles.main}>
-        <AnalogClock clock={clock} settings={settings} />
+        <AnalogClock clock={clock} settings={settings} visualActionEpoch={chime.visualActionEpoch} />
       </main>
     </div>
   );
