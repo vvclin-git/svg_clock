@@ -52,14 +52,21 @@ describe("ClockStage", () => {
 
       act(() => {
         animationFrames[0]?.(1000);
+        animationFrames[1]?.(10000);
       });
 
       const numeral = container.querySelector("[data-element-id='fantasia-numeral-12']");
       const clippedGroup = numeral?.querySelector("g[clip-path]");
       const clipCircle = numeral?.querySelector("clipPath circle");
+      const movingGroup = clippedGroup?.querySelector("g[transform]");
+      const transform = movingGroup?.getAttribute("transform") ?? "";
+      const translateMatch = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(transform);
+      const translateX = Number(translateMatch?.[1] ?? 0);
+      const translateY = Number(translateMatch?.[2] ?? 0);
 
       expect(clippedGroup?.getAttribute("clip-path")).toContain("fantasia-numeral-12-clip");
       expect(clipCircle?.getAttribute("r")).toBe("8");
+      expect(Math.hypot(translateX, translateY)).toBeGreaterThan(16);
     } finally {
       window.requestAnimationFrame = originalRequestAnimationFrame;
       window.cancelAnimationFrame = originalCancelAnimationFrame;

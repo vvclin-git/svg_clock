@@ -30,6 +30,8 @@ const FANTASIA_REVEAL_DELAY_BY_HOUR = new Map(
   FANTASIA_REVEAL_ORDER.map((hourIndex, orderIndex) => [hourIndex, orderIndex * FANTASIA_REVEAL_STAGGER_MS]),
 );
 const FANTASIA_NUMERAL_REVEAL_CLIP_RADIUS = 8;
+const FANTASIA_NUMERAL_REVEAL_TANGENTIAL_TRAVEL = 17;
+const FANTASIA_NUMERAL_REVEAL_RADIAL_TRAVEL = 2.2;
 
 function getAnimationClassName(animation?: ElementAnimationConfig) {
   if (!animation?.enabled || animation.kind === "none") {
@@ -118,13 +120,14 @@ function getFantasiaRevealTransform(element: NumeralElement, progressMs: number)
   const tangentY = Math.cos(angleRadians) * direction;
   const radialX = Math.cos(angleRadians);
   const radialY = Math.sin(angleRadians);
-  const translateX = (tangentX * 9.4 + radialX * 2.2) * revealProgress;
-  const translateY = (tangentY * 9.4 + radialY * 2.2) * revealProgress;
+  const translateX =
+    (tangentX * FANTASIA_NUMERAL_REVEAL_TANGENTIAL_TRAVEL + radialX * FANTASIA_NUMERAL_REVEAL_RADIAL_TRAVEL) * revealProgress;
+  const translateY =
+    (tangentY * FANTASIA_NUMERAL_REVEAL_TANGENTIAL_TRAVEL + radialY * FANTASIA_NUMERAL_REVEAL_RADIAL_TRAVEL) * revealProgress;
   const rotate = direction * 10 * revealProgress;
 
   return {
     transform: `translate(${translateX} ${translateY}) rotate(${rotate})`,
-    opacity: 1 - 0.18 * revealProgress,
   };
 }
 
