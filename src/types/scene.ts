@@ -11,7 +11,14 @@ export type ElementAnimationTrigger =
   | "onPointerDown"
   | "onPointerUp"
   | "manual";
-export type ClockElementSlot = "clockface" | "characters" | "numerals" | "decorations" | "hands" | "center-cap";
+export type ClockElementSlot =
+  | "clockface-bottom"
+  | "clockface"
+  | "characters"
+  | "numerals"
+  | "decorations"
+  | "hands"
+  | "center-cap";
 
 export type ElementAnimationConfig = {
   enabled: boolean;
@@ -50,7 +57,7 @@ export type BaseAssetElement = {
 };
 
 export type ClockfaceElement = BaseAssetElement & {
-  zSlot: "clockface";
+  zSlot: "clockface-bottom" | "clockface";
 };
 
 export type NumeralElement = BaseAssetElement & {
@@ -90,6 +97,7 @@ export type HandElement = BaseAssetElement & {
 export type ClockSceneDefinition = {
   id: ClockSceneId;
   label: string;
+  clockfaceBottom: ClockfaceElement[];
   clockface: ClockfaceElement[];
   characters: CharacterElement[];
   numerals: NumeralElement[];

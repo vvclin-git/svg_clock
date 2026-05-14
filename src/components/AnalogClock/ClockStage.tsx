@@ -22,10 +22,14 @@ type ClockStageProps = {
 
 type AnimationEpochs = Record<Exclude<ElementAnimationTrigger, "always" | "manual">, number>;
 
-const FANTASIA_REVEAL_DURATION_MS = 15000;
-const FANTASIA_REVEAL_PLATE_DURATION_MS = 3600;
+const FANTASIA_REVEAL_DURATION_MS = 60000;
+const FANTASIA_REVEAL_PLATE_DURATION_MS = 18000;
 const FANTASIA_REVEAL_ORDER = [12, 11, 1, 10, 2, 9, 3, 8, 4, 7, 5, 6];
-const FANTASIA_REVEAL_DELAY_BY_HOUR = new Map(FANTASIA_REVEAL_ORDER.map((hourIndex, orderIndex) => [hourIndex, orderIndex * 760]));
+const FANTASIA_REVEAL_STAGGER_MS = (FANTASIA_REVEAL_DURATION_MS - FANTASIA_REVEAL_PLATE_DURATION_MS) / (FANTASIA_REVEAL_ORDER.length - 1);
+const FANTASIA_REVEAL_DELAY_BY_HOUR = new Map(
+  FANTASIA_REVEAL_ORDER.map((hourIndex, orderIndex) => [hourIndex, orderIndex * FANTASIA_REVEAL_STAGGER_MS]),
+);
+const FANTASIA_NUMERAL_REVEAL_CLIP_RADIUS = 8;
 
 function getAnimationClassName(animation?: ElementAnimationConfig) {
   if (!animation?.enabled || animation.kind === "none") {
@@ -202,10 +206,11 @@ type SceneImageProps = {
   extraRotation?: number;
   extraTransform?: string;
   extraOpacity?: number;
+  clipRadius?: number;
   epochs: AnimationEpochs;
 };
 
-function SceneImage({ element, extraRotation = 0, extraTransform, extraOpacity = 1, epochs }: SceneImageProps) {
+function SceneImage({ element, extraRotation = 0, extraTransform, extraOpacity = 1, clipRadius, epochs }: SceneImageProps) {
   if (element.visible === false) {
     return null;
   }
@@ -216,7 +221,8 @@ function SceneImage({ element, extraRotation = 0, extraTransform, extraOpacity =
   const epoch = getElementEpoch(element.animation, epochs);
   const className = getAnimationClassName(element.animation);
   const animationStyle = getAnimationStyle(element.animation);
-  const clipPathId = element.zSlot === "characters" ? `${element.id}-clip` : undefined;
+  const clipPathId = element.zSlot === "characters" || clipRadius ? `${element.id}-clip` : undefined;
+  const resolvedClipRadius = clipRadius ?? Math.min(element.width, element.height) / 2;
 
   return (
     <g
@@ -228,21 +234,22 @@ function SceneImage({ element, extraRotation = 0, extraTransform, extraOpacity =
       {clipPathId ? (
         <defs>
           <clipPath id={clipPathId}>
-            <circle cx="0" cy="0" r={Math.min(element.width, element.height) / 2} />
+            <circle cx="0" cy="0" r={resolvedClipRadius} />
           </clipPath>
         </defs>
       ) : null}
-      <g key={`${element.id}-${epoch}`} transform={extraTransform} className={className} style={animationStyle}>
-        <image
-          href={element.src}
-          x={-element.width * anchorX}
-          y={-element.height * anchorY}
-          width={element.width}
-          height={element.height}
-          clipPath={clipPathId ? `url(#${clipPathId})` : undefined}
-          preserveAspectRatio={element.preserveAspectRatio ?? "xMidYMid meet"}
-          transform={element.scale && element.scale !== 1 ? `scale(${element.scale})` : undefined}
-        />
+      <g clipPath={clipPathId ? `url(#${clipPathId})` : undefined}>
+        <g key={`${element.id}-${epoch}`} transform={extraTransform} className={className} style={animationStyle}>
+          <image
+            href={element.src}
+            x={-element.width * anchorX}
+            y={-element.height * anchorY}
+            width={element.width}
+            height={element.height}
+            preserveAspectRatio={element.preserveAspectRatio ?? "xMidYMid meet"}
+            transform={element.scale && element.scale !== 1 ? `scale(${element.scale})` : undefined}
+          />
+        </g>
       </g>
     </g>
   );
@@ -306,6 +313,7 @@ function SceneLayer({ elements, slot, clock, showSecondHand, epochs, revealProgr
               epochs={epochs}
               extraTransform={revealTransform?.transform}
               extraOpacity={revealTransform?.opacity}
+              clipRadius={FANTASIA_NUMERAL_REVEAL_CLIP_RADIUS}
             />
           );
         }
@@ -365,8 +373,8 @@ export function ClockStage({ clock, settings, visualActionEpoch = 0 }: ClockStag
     <div className={styles.stage}>
       <svg className={styles.svg} viewBox="0 0 100 100" role="img" aria-label={clock.formattedTime}>
         <SceneLayer
-          elements={scene.clockface}
-          slot="clockface"
+          elements={scene.clockfaceBottom}
+          slot="clockface-bottom"
           clock={clock}
           showSecondHand={settings.showSecondHand}
           epochs={epochs}
@@ -383,6 +391,14 @@ export function ClockStage({ clock, settings, visualActionEpoch = 0 }: ClockStag
         <SceneLayer
           elements={scene.numerals}
           slot="numerals"
+          clock={clock}
+          showSecondHand={settings.showSecondHand}
+          epochs={epochs}
+          revealProgressMs={revealProgressMs}
+        />
+        <SceneLayer
+          elements={scene.clockface}
+          slot="clockface"
           clock={clock}
           showSecondHand={settings.showSecondHand}
           epochs={epochs}

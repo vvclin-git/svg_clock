@@ -17,6 +17,7 @@ describe("AppShell", () => {
 
     expect(screen.getByAltText("SEIKO FANTASIA")).not.toBeNull();
     expect(screen.getByLabelText("Digital time")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Chime" })).not.toBeNull();
     expect(screen.queryByRole("button", { name: /Digital/i })).toBeNull();
   });
 

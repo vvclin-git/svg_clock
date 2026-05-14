@@ -52,6 +52,9 @@ function Harness({ time, mode = "live", dragState = idleDragState }: HarnessProp
       <button type="button" onClick={() => void chime.playSelectedSong()}>
         Test chime
       </button>
+      <button type="button" onClick={() => void chime.playDefaultSong()}>
+        Default chime
+      </button>
     </>
   );
 }
@@ -75,6 +78,16 @@ describe("useChimeScheduler", () => {
     render(<Harness time={{ hours: 9, minutes: 54, seconds: 59, milliseconds: 900 }} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Test chime" }));
+
+    await waitFor(() => expect(playChimeSong).toHaveBeenCalledTimes(1));
+    expect(playChimeSong).toHaveBeenCalledWith(expect.objectContaining({ id: "grand-fathers-clock" }));
+    expect(screen.getByTestId("visual-action-epoch").textContent).toBe("1");
+  });
+
+  it("starts visual action when manually playing the default registered song", async () => {
+    render(<Harness time={{ hours: 9, minutes: 54, seconds: 59, milliseconds: 900 }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Default chime" }));
 
     await waitFor(() => expect(playChimeSong).toHaveBeenCalledTimes(1));
     expect(playChimeSong).toHaveBeenCalledWith(expect.objectContaining({ id: "grand-fathers-clock" }));

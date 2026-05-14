@@ -45,7 +45,12 @@ export function AppShell() {
         />
       ) : null}
       <main className={styles.main}>
-        <AnalogClock clock={clock} settings={settings} visualActionEpoch={chime.visualActionEpoch} />
+        <div className={styles.clockStack}>
+          <AnalogClock clock={clock} settings={settings} visualActionEpoch={chime.visualActionEpoch} />
+          <button type="button" className={styles.chimeButton} onClick={() => void chime.playDefaultSong()} disabled={!chime.defaultSong}>
+            Chime
+          </button>
+        </div>
       </main>
     </div>
   );

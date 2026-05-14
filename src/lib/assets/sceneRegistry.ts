@@ -2,6 +2,7 @@ import dualRingFace from "../../assets/faces/dual-ring-face.svg";
 import barHour from "../../assets/hands/bar/hour.svg";
 import barMinute from "../../assets/hands/bar/minute.svg";
 import barSecond from "../../assets/hands/bar/second.svg";
+import fantasiaClockfaceBottom from "../../assets/fantasia/clockface/clockface_bottom_solid_cream.png";
 import fantasiaClockface from "../../assets/fantasia/clockface/clockface_scaled_edited_carved_noback.png";
 import fantasiaHour from "../../assets/fantasia/hands/hands_hour_noback.png";
 import fantasiaMinute from "../../assets/fantasia/hands/hands_minute_noback.png";
@@ -18,18 +19,18 @@ import fantasiaNumeral9 from "../../assets/fantasia/numeral/numeral_9_noback.png
 import fantasiaNumeral10 from "../../assets/fantasia/numeral/numeral_10_noback.png";
 import fantasiaNumeral11 from "../../assets/fantasia/numeral/numeral_11_noback.png";
 import fantasiaNumeral12 from "../../assets/fantasia/numeral/numeral_12_noback.png";
-import fantasiaCharacter1 from "../../assets/fantasia/characters/imagegen_sources/character_1_imagegen_source.png";
-import fantasiaCharacter2 from "../../assets/fantasia/characters/imagegen_sources/character_2_imagegen_source.png";
-import fantasiaCharacter3 from "../../assets/fantasia/characters/imagegen_sources/character_3_imagegen_source.png";
-import fantasiaCharacter4 from "../../assets/fantasia/characters/imagegen_sources/character_4_imagegen_source.png";
-import fantasiaCharacter5 from "../../assets/fantasia/characters/imagegen_sources/character_5_imagegen_source.png";
-import fantasiaCharacter6 from "../../assets/fantasia/characters/imagegen_sources/character_6_imagegen_source.png";
-import fantasiaCharacter7 from "../../assets/fantasia/characters/imagegen_sources/character_7_imagegen_source.png";
-import fantasiaCharacter8 from "../../assets/fantasia/characters/imagegen_sources/character_8_imagegen_source.png";
-import fantasiaCharacter9 from "../../assets/fantasia/characters/imagegen_sources/character_9_imagegen_source.png";
-import fantasiaCharacter10 from "../../assets/fantasia/characters/imagegen_sources/character_10_imagegen_source.png";
-import fantasiaCharacter11 from "../../assets/fantasia/characters/imagegen_sources/character_11_imagegen_source.png";
-import fantasiaCharacter12 from "../../assets/fantasia/characters/imagegen_sources/character_12_imagegen_source.png";
+import fantasiaCharacter1 from "../../assets/fantasia/characters/character_1_noback.png";
+import fantasiaCharacter2 from "../../assets/fantasia/characters/character_2_noback.png";
+import fantasiaCharacter3 from "../../assets/fantasia/characters/character_3_noback.png";
+import fantasiaCharacter4 from "../../assets/fantasia/characters/character_4_noback.png";
+import fantasiaCharacter5 from "../../assets/fantasia/characters/character_5_noback.png";
+import fantasiaCharacter6 from "../../assets/fantasia/characters/character_6_noback.png";
+import fantasiaCharacter7 from "../../assets/fantasia/characters/character_7_noback.png";
+import fantasiaCharacter8 from "../../assets/fantasia/characters/character_8_noback.png";
+import fantasiaCharacter9 from "../../assets/fantasia/characters/character_9_noback.png";
+import fantasiaCharacter10 from "../../assets/fantasia/characters/character_10_noback.png";
+import fantasiaCharacter11 from "../../assets/fantasia/characters/character_11_noback.png";
+import fantasiaCharacter12 from "../../assets/fantasia/characters/character_12_noback.png";
 import type { ClockSceneDefinition, ClockSceneId } from "../../types/scene";
 
 function svgDataUrl(svg: string) {
@@ -128,6 +129,7 @@ export const sceneRegistry: Record<ClockSceneId, ClockSceneDefinition> = {
   default: {
     id: "default",
     label: "Dual Ring",
+    clockfaceBottom: [],
     clockface: [
       {
         id: "dual-ring-face",
@@ -246,6 +248,19 @@ export const sceneRegistry: Record<ClockSceneId, ClockSceneDefinition> = {
   fantasia: {
     id: "fantasia",
     label: "Fantasia",
+    clockfaceBottom: [
+      {
+        id: "fantasia-clockface-bottom",
+        src: fantasiaClockfaceBottom,
+        x: 50,
+        y: 50.5,
+        width: 100,
+        height: 100,
+        anchorX: 0.5,
+        anchorY: 0.5,
+        zSlot: "clockface-bottom",
+      },
+    ],
     clockface: [
       {
         id: "fantasia-clockface",

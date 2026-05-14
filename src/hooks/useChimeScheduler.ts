@@ -3,7 +3,7 @@ import type { ClockMode, ClockTime } from "../types/clock";
 import type { ChimePlaybackStatus, ChimeSong } from "../types/chime";
 import type { ChimeSettings } from "../types/settings";
 import type { DragState } from "../types/drag";
-import { getChimeSong } from "../lib/assets/chimeRegistry";
+import { chimeRegistry, getChimeSong } from "../lib/assets/chimeRegistry";
 import { getCrossedChimeEntries, getNextChimeEntry, minuteToTimeString } from "../lib/chime/chimeSchedule";
 import { playChimeSong, unlockChimeSong } from "../lib/chime/chimePlayback";
 
@@ -27,6 +27,8 @@ export type UseChimeSchedulerResult = {
   nextSongLabel: string | null;
   playbackStatus: ChimePlaybackStatus;
   visualActionEpoch: number;
+  defaultSong: ChimeSong | null;
+  playDefaultSong: () => Promise<void>;
   playSelectedSong: () => Promise<void>;
   unlockSelectedSong: () => Promise<void>;
 };
@@ -46,6 +48,7 @@ export function useChimeScheduler({
   const [playbackStatus, setPlaybackStatus] = useState<ChimePlaybackStatus>(idleStatus);
   const [visualActionEpoch, setVisualActionEpoch] = useState(0);
   const selectedSong = useMemo(() => getChimeSong(settings.songId), [settings.songId]);
+  const defaultSong = chimeRegistry[0] ?? null;
   const nextChimeEntry = useMemo(() => getNextChimeEntry(displayedTime, settings), [displayedTime, settings]);
   const nextTriggerLabel = nextChimeEntry ? minuteToTimeString(nextChimeEntry.triggerMinute) : null;
   const nextTargetLabel = nextChimeEntry ? minuteToTimeString(nextChimeEntry.targetMinute) : null;
@@ -56,6 +59,11 @@ export function useChimeScheduler({
     const status = await playChimeSong(selectedSong);
     setPlaybackStatus(status);
   }, [selectedSong]);
+  const playDefaultSong = useCallback(async () => {
+    setVisualActionEpoch((epoch) => epoch + 1);
+    const status = await playChimeSong(defaultSong);
+    setPlaybackStatus(status);
+  }, [defaultSong]);
   const unlockSelectedSong = useCallback(async () => {
     const status = await unlockChimeSong(selectedSong);
     setPlaybackStatus(status);
@@ -100,6 +108,8 @@ export function useChimeScheduler({
     nextSongLabel,
     playbackStatus,
     visualActionEpoch,
+    defaultSong,
+    playDefaultSong,
     playSelectedSong,
     unlockSelectedSong,
   };
