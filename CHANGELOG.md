@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- Fixed the Fantasia numeral reveal transform typing so the GitHub Pages build passes strict TypeScript checks.
+
 ## [0.4.0] - 2026-05-02
 
 ### Added

@@ -33,6 +33,11 @@ const FANTASIA_NUMERAL_REVEAL_CLIP_RADIUS = 8;
 const FANTASIA_NUMERAL_REVEAL_TANGENTIAL_TRAVEL = 17;
 const FANTASIA_NUMERAL_REVEAL_RADIAL_TRAVEL = 2.2;
 
+type FantasiaRevealTransform = {
+  transform: string;
+  opacity?: number;
+};
+
 function getAnimationClassName(animation?: ElementAnimationConfig) {
   if (!animation?.enabled || animation.kind === "none") {
     return undefined;
@@ -105,7 +110,7 @@ function easeInOutCubic(value: number) {
   return value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 }
 
-function getFantasiaRevealTransform(element: NumeralElement, progressMs: number) {
+function getFantasiaRevealTransform(element: NumeralElement, progressMs: number): FantasiaRevealTransform | undefined {
   const delayMs = FANTASIA_REVEAL_DELAY_BY_HOUR.get(element.hourIndex) ?? 0;
   const localProgress = clampProgress((progressMs - delayMs) / FANTASIA_REVEAL_PLATE_DURATION_MS);
 

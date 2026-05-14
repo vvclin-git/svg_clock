@@ -195,6 +195,7 @@ https://vvclin-git.github.io/svg_clock/
 Deployment details:
 
 - Vite is configured with `base: "/svg_clock/"`
+- The workflow runs `npm run build`, including strict TypeScript checks, before publishing
 - GitHub Pages should be configured to use `GitHub Actions` as the source
 - Pushing to `main` triggers a build and deploy of the `dist/` output
 
