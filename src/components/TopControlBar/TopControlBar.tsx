@@ -5,11 +5,13 @@ import type { ClockMode } from "../../types/clock";
 
 type TopControlBarProps = {
   onSync: () => void;
+  onToggleSettings: () => void;
   mode: ClockMode;
   formattedTime: string;
+  settingsOpen: boolean;
 };
 
-export function TopControlBar({ onSync, mode, formattedTime }: TopControlBarProps) {
+export function TopControlBar({ onSync, onToggleSettings, mode, formattedTime, settingsOpen }: TopControlBarProps) {
   return (
     <header className={styles.bar}>
       <img className={styles.logo} src={fantasiaLogo} alt="SEIKO FANTASIA" />
@@ -20,6 +22,15 @@ export function TopControlBar({ onSync, mode, formattedTime }: TopControlBarProp
         <div className={styles.digitalTime} aria-label="Digital time" aria-live="polite">
           {formattedTime}
         </div>
+        <button
+          className={styles.settingsButton}
+          type="button"
+          onClick={onToggleSettings}
+          aria-expanded={settingsOpen}
+          aria-controls="clock-settings"
+        >
+          Settings
+        </button>
         <SyncButton onClick={onSync} />
       </div>
     </header>

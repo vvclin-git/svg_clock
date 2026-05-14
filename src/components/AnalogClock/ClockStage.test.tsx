@@ -13,7 +13,7 @@ import { sceneRegistry } from "../../lib/assets/sceneRegistry";
 const rasterPixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sfpnWgAAAAASUVORK5CYII=";
 const defaultSceneSettings: ClockSettings = { ...DEFAULT_CLOCK_SETTINGS, sceneId: "default" };
 
-function EngineHarness({ settings }: { settings: ClockSettings }) {
+function EngineHarness({ settings, visualActionEpoch = 0 }: { settings: ClockSettings; visualActionEpoch?: number }) {
   const clock = useClockEngine(settings);
 
   return (
@@ -23,7 +23,7 @@ function EngineHarness({ settings }: { settings: ClockSettings }) {
       <button type="button" onClick={clock.syncToNow}>
         Sync test clock
       </button>
-      <ClockStage clock={clock} settings={settings} />
+      <ClockStage clock={clock} settings={settings} visualActionEpoch={visualActionEpoch} />
     </>
   );
 }
@@ -33,13 +33,63 @@ describe("ClockStage", () => {
     const { container } = render(<EngineHarness settings={DEFAULT_CLOCK_SETTINGS} />);
     const layers = Array.from(container.querySelectorAll("[data-layer]")).map((node) => node.getAttribute("data-layer"));
 
-    expect(layers).toEqual(["clockface", "numerals", "decorations", "hands", "center-cap"]);
+    expect(layers).toEqual(["clockface-bottom", "characters", "numerals", "clockface", "decorations", "hands", "center-cap"]);
+  });
+
+  it("clips moving Fantasia numerals to their home holes during reveal", () => {
+    const animationFrames: FrameRequestCallback[] = [];
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+
+    window.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
+      animationFrames.push(callback);
+      return animationFrames.length;
+    });
+    window.cancelAnimationFrame = vi.fn();
+
+    try {
+      const { container } = render(<EngineHarness settings={DEFAULT_CLOCK_SETTINGS} visualActionEpoch={1} />);
+
+      act(() => {
+        animationFrames[0]?.(1000);
+        animationFrames[1]?.(10000);
+      });
+
+      const numeral = container.querySelector("[data-element-id='fantasia-numeral-12']");
+      const clippedGroup = numeral?.querySelector("g[clip-path]");
+      const clipCircle = numeral?.querySelector("clipPath circle");
+      const movingGroup = clippedGroup?.querySelector("g[transform]");
+      const transform = movingGroup?.getAttribute("transform") ?? "";
+      const translateMatch = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(transform);
+      const translateX = Number(translateMatch?.[1] ?? 0);
+      const translateY = Number(translateMatch?.[2] ?? 0);
+
+      expect(clippedGroup?.getAttribute("clip-path")).toContain("fantasia-numeral-12-clip");
+      expect(clipCircle?.getAttribute("r")).toBe("8");
+      expect(Math.hypot(translateX, translateY)).toBeGreaterThan(16);
+    } finally {
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+    }
   });
 
   it("can render a scene with raster assets in every category", () => {
     const testScene: ClockSceneDefinition = {
       id: "default",
       label: "Raster Test",
+      clockfaceBottom: [
+        {
+          id: "face-bottom",
+          src: rasterPixel,
+          x: 50,
+          y: 50,
+          width: 100,
+          height: 100,
+          anchorX: 0.5,
+          anchorY: 0.5,
+          zSlot: "clockface-bottom",
+        },
+      ],
       clockface: [
         {
           id: "face",
@@ -51,6 +101,20 @@ describe("ClockStage", () => {
           anchorX: 0.5,
           anchorY: 0.5,
           zSlot: "clockface",
+        },
+      ],
+      characters: [
+        {
+          id: "character-1",
+          src: rasterPixel,
+          hourIndex: 1,
+          x: 50,
+          y: 16,
+          width: 8,
+          height: 8,
+          anchorX: 0.5,
+          anchorY: 0.5,
+          zSlot: "characters",
         },
       ],
       numerals: [
@@ -121,7 +185,9 @@ describe("ClockStage", () => {
       const { container } = render(<EngineHarness settings={defaultSceneSettings} />);
       const images = container.querySelectorAll("image");
 
-      expect(images).toHaveLength(5);
+      expect(images).toHaveLength(7);
+      expect(container.querySelector("[data-element-id='face-bottom']")).not.toBeNull();
+      expect(container.querySelector("[data-element-id='character-1']")).not.toBeNull();
       expect(container.querySelector("[data-element-id='numeral-1']")).not.toBeNull();
       expect(container.querySelector("[data-element-id='decoration-1']")).not.toBeNull();
       expect(container.querySelector("[data-element-id='hour']")).not.toBeNull();
@@ -134,6 +200,7 @@ describe("ClockStage", () => {
     const originalScene = sceneRegistry.default;
     sceneRegistry.default = {
       ...originalScene,
+      characters: [],
       numerals: [
         {
           id: "hidden-numeral",
@@ -164,6 +231,24 @@ describe("ClockStage", () => {
     const originalScene = sceneRegistry.default;
     sceneRegistry.default = {
       ...originalScene,
+      characters: [
+        {
+          id: "polar-character",
+          src: rasterPixel,
+          hourIndex: 12,
+          x: 0,
+          y: 0,
+          polar: {
+            angle: 0,
+            radius: 40,
+          },
+          width: 8,
+          height: 8,
+          anchorX: 0.5,
+          anchorY: 0.5,
+          zSlot: "characters",
+        },
+      ],
       numerals: [
         {
           id: "polar-numeral",
@@ -206,9 +291,11 @@ describe("ClockStage", () => {
     try {
       const { container } = render(<EngineHarness settings={defaultSceneSettings} />);
       const numeral = container.querySelector("[data-element-id='polar-numeral']");
+      const character = container.querySelector("[data-element-id='polar-character']");
       const decoration = container.querySelector("[data-element-id='polar-logo']");
 
       expect(numeral?.getAttribute("transform")).toContain("translate(50 10)");
+      expect(character?.getAttribute("transform")).toContain("translate(50 10)");
       expect(decoration?.getAttribute("transform")).toContain("translate(70 50)");
     } finally {
       sceneRegistry.default = originalScene;

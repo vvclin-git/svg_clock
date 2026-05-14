@@ -7,6 +7,7 @@ import type {
   ElementAnimationConfig,
   ElementAnimationTrigger,
   HandElement,
+  NumeralElement,
 } from "../../types/scene";
 import { sceneRegistry } from "../../lib/assets/sceneRegistry";
 import { clockPolarToPoint } from "../../lib/geometry/polar";
@@ -16,9 +17,21 @@ import styles from "./ClockStage.module.css";
 type ClockStageProps = {
   clock: UseClockEngineResult;
   settings: ClockSettings;
+  visualActionEpoch?: number;
 };
 
 type AnimationEpochs = Record<Exclude<ElementAnimationTrigger, "always" | "manual">, number>;
+
+const FANTASIA_REVEAL_DURATION_MS = 60000;
+const FANTASIA_REVEAL_PLATE_DURATION_MS = 18000;
+const FANTASIA_REVEAL_ORDER = [12, 11, 1, 10, 2, 9, 3, 8, 4, 7, 5, 6];
+const FANTASIA_REVEAL_STAGGER_MS = (FANTASIA_REVEAL_DURATION_MS - FANTASIA_REVEAL_PLATE_DURATION_MS) / (FANTASIA_REVEAL_ORDER.length - 1);
+const FANTASIA_REVEAL_DELAY_BY_HOUR = new Map(
+  FANTASIA_REVEAL_ORDER.map((hourIndex, orderIndex) => [hourIndex, orderIndex * FANTASIA_REVEAL_STAGGER_MS]),
+);
+const FANTASIA_NUMERAL_REVEAL_CLIP_RADIUS = 8;
+const FANTASIA_NUMERAL_REVEAL_TANGENTIAL_TRAVEL = 17;
+const FANTASIA_NUMERAL_REVEAL_RADIAL_TRAVEL = 2.2;
 
 function getAnimationClassName(animation?: ElementAnimationConfig) {
   if (!animation?.enabled || animation.kind === "none") {
@@ -82,6 +95,40 @@ function getElementPosition(element: BaseAssetElement) {
   }
 
   return clockPolarToPoint(element.polar.angle, element.polar.radius, element.polar.centerX ?? 50, element.polar.centerY ?? 50);
+}
+
+function clampProgress(value: number) {
+  return Math.max(0, Math.min(1, value));
+}
+
+function easeInOutCubic(value: number) {
+  return value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+}
+
+function getFantasiaRevealTransform(element: NumeralElement, progressMs: number) {
+  const delayMs = FANTASIA_REVEAL_DELAY_BY_HOUR.get(element.hourIndex) ?? 0;
+  const localProgress = clampProgress((progressMs - delayMs) / FANTASIA_REVEAL_PLATE_DURATION_MS);
+
+  if (localProgress <= 0 || localProgress >= 1) {
+    return undefined;
+  }
+
+  const revealProgress = easeInOutCubic(Math.sin(localProgress * Math.PI));
+  const angleRadians = ((element.polar?.angle ?? element.hourIndex * 30) - 90) * (Math.PI / 180);
+  const direction = element.hourIndex <= 6 ? 1 : -1;
+  const tangentX = -Math.sin(angleRadians) * direction;
+  const tangentY = Math.cos(angleRadians) * direction;
+  const radialX = Math.cos(angleRadians);
+  const radialY = Math.sin(angleRadians);
+  const translateX =
+    (tangentX * FANTASIA_NUMERAL_REVEAL_TANGENTIAL_TRAVEL + radialX * FANTASIA_NUMERAL_REVEAL_RADIAL_TRAVEL) * revealProgress;
+  const translateY =
+    (tangentY * FANTASIA_NUMERAL_REVEAL_TANGENTIAL_TRAVEL + radialY * FANTASIA_NUMERAL_REVEAL_RADIAL_TRAVEL) * revealProgress;
+  const rotate = direction * 10 * revealProgress;
+
+  return {
+    transform: `translate(${translateX} ${translateY}) rotate(${rotate})`,
+  };
 }
 
 function getHandAngle(hand: HandElement, clock: UseClockEngineResult) {
@@ -160,10 +207,13 @@ function useAnimationEpochs(clock: UseClockEngineResult): AnimationEpochs {
 type SceneImageProps = {
   element: BaseAssetElement;
   extraRotation?: number;
+  extraTransform?: string;
+  extraOpacity?: number;
+  clipRadius?: number;
   epochs: AnimationEpochs;
 };
 
-function SceneImage({ element, extraRotation = 0, epochs }: SceneImageProps) {
+function SceneImage({ element, extraRotation = 0, extraTransform, extraOpacity = 1, clipRadius, epochs }: SceneImageProps) {
   if (element.visible === false) {
     return null;
   }
@@ -174,24 +224,35 @@ function SceneImage({ element, extraRotation = 0, epochs }: SceneImageProps) {
   const epoch = getElementEpoch(element.animation, epochs);
   const className = getAnimationClassName(element.animation);
   const animationStyle = getAnimationStyle(element.animation);
+  const clipPathId = element.zSlot === "characters" || clipRadius ? `${element.id}-clip` : undefined;
+  const resolvedClipRadius = clipRadius ?? Math.min(element.width, element.height) / 2;
 
   return (
     <g
       data-element-id={element.id}
       data-z-slot={element.zSlot}
       transform={`translate(${position.x} ${position.y}) rotate(${getBaseRotation(element) + extraRotation})`}
-      opacity={element.opacity ?? 1}
+      opacity={(element.opacity ?? 1) * extraOpacity}
     >
-      <g key={`${element.id}-${epoch}`} className={className} style={animationStyle}>
-        <image
-          href={element.src}
-          x={-element.width * anchorX}
-          y={-element.height * anchorY}
-          width={element.width}
-          height={element.height}
-          preserveAspectRatio={element.preserveAspectRatio ?? "xMidYMid meet"}
-          transform={element.scale && element.scale !== 1 ? `scale(${element.scale})` : undefined}
-        />
+      {clipPathId ? (
+        <defs>
+          <clipPath id={clipPathId}>
+            <circle cx="0" cy="0" r={resolvedClipRadius} />
+          </clipPath>
+        </defs>
+      ) : null}
+      <g clipPath={clipPathId ? `url(#${clipPathId})` : undefined}>
+        <g key={`${element.id}-${epoch}`} transform={extraTransform} className={className} style={animationStyle}>
+          <image
+            href={element.src}
+            x={-element.width * anchorX}
+            y={-element.height * anchorY}
+            width={element.width}
+            height={element.height}
+            preserveAspectRatio={element.preserveAspectRatio ?? "xMidYMid meet"}
+            transform={element.scale && element.scale !== 1 ? `scale(${element.scale})` : undefined}
+          />
+        </g>
       </g>
     </g>
   );
@@ -203,9 +264,10 @@ type LayerProps = {
   clock: UseClockEngineResult;
   showSecondHand: boolean;
   epochs: AnimationEpochs;
+  revealProgressMs: number | null;
 };
 
-function SceneLayer({ elements, slot, clock, showSecondHand, epochs }: LayerProps) {
+function SceneLayer({ elements, slot, clock, showSecondHand, epochs, revealProgressMs }: LayerProps) {
   return (
     <g data-layer={slot}>
       {elements.map((element) => {
@@ -244,15 +306,64 @@ function SceneLayer({ elements, slot, clock, showSecondHand, epochs }: LayerProp
           );
         }
 
+        if (slot === "numerals" && revealProgressMs !== null && "hourIndex" in element) {
+          const revealTransform = getFantasiaRevealTransform(element as NumeralElement, revealProgressMs);
+
+          return (
+            <SceneImage
+              key={element.id}
+              element={element}
+              epochs={epochs}
+              extraTransform={revealTransform?.transform}
+              extraOpacity={revealTransform?.opacity}
+              clipRadius={FANTASIA_NUMERAL_REVEAL_CLIP_RADIUS}
+            />
+          );
+        }
+
         return <SceneImage key={element.id} element={element} epochs={epochs} />;
       })}
     </g>
   );
 }
 
-export function ClockStage({ clock, settings }: ClockStageProps) {
+function useFantasiaRevealProgress(sceneId: string, visualActionEpoch: number) {
+  const [progressMs, setProgressMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (sceneId !== "fantasia" || visualActionEpoch <= 0) {
+      setProgressMs(null);
+      return undefined;
+    }
+
+    let animationFrame = 0;
+    let startTime: number | null = null;
+
+    const tick = (timestamp: number) => {
+      startTime ??= timestamp;
+      const elapsedMs = timestamp - startTime;
+
+      if (elapsedMs >= FANTASIA_REVEAL_DURATION_MS) {
+        setProgressMs(null);
+        return;
+      }
+
+      setProgressMs(elapsedMs);
+      animationFrame = window.requestAnimationFrame(tick);
+    };
+
+    animationFrame = window.requestAnimationFrame(tick);
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [sceneId, visualActionEpoch]);
+
+  return progressMs;
+}
+
+export function ClockStage({ clock, settings, visualActionEpoch = 0 }: ClockStageProps) {
   const scene = sceneRegistry[settings.sceneId];
   const epochs = useAnimationEpochs(clock);
+  const revealProgressMs = useFantasiaRevealProgress(settings.sceneId, visualActionEpoch);
   const decorationLayers = useMemo(
     () => ({
       decorations: scene.decorations.filter((element) => element.zSlot === "decorations"),
@@ -264,22 +375,61 @@ export function ClockStage({ clock, settings }: ClockStageProps) {
   return (
     <div className={styles.stage}>
       <svg className={styles.svg} viewBox="0 0 100 100" role="img" aria-label={clock.formattedTime}>
-        <SceneLayer elements={scene.clockface} slot="clockface" clock={clock} showSecondHand={settings.showSecondHand} epochs={epochs} />
-        <SceneLayer elements={scene.numerals} slot="numerals" clock={clock} showSecondHand={settings.showSecondHand} epochs={epochs} />
+        <SceneLayer
+          elements={scene.clockfaceBottom}
+          slot="clockface-bottom"
+          clock={clock}
+          showSecondHand={settings.showSecondHand}
+          epochs={epochs}
+          revealProgressMs={revealProgressMs}
+        />
+        <SceneLayer
+          elements={scene.characters}
+          slot="characters"
+          clock={clock}
+          showSecondHand={settings.showSecondHand}
+          epochs={epochs}
+          revealProgressMs={revealProgressMs}
+        />
+        <SceneLayer
+          elements={scene.numerals}
+          slot="numerals"
+          clock={clock}
+          showSecondHand={settings.showSecondHand}
+          epochs={epochs}
+          revealProgressMs={revealProgressMs}
+        />
+        <SceneLayer
+          elements={scene.clockface}
+          slot="clockface"
+          clock={clock}
+          showSecondHand={settings.showSecondHand}
+          epochs={epochs}
+          revealProgressMs={revealProgressMs}
+        />
         <SceneLayer
           elements={decorationLayers.decorations}
           slot="decorations"
           clock={clock}
           showSecondHand={settings.showSecondHand}
           epochs={epochs}
+          revealProgressMs={revealProgressMs}
         />
-        <SceneLayer elements={scene.hands} slot="hands" clock={clock} showSecondHand={settings.showSecondHand} epochs={epochs} />
+        <SceneLayer
+          elements={scene.hands}
+          slot="hands"
+          clock={clock}
+          showSecondHand={settings.showSecondHand}
+          epochs={epochs}
+          revealProgressMs={revealProgressMs}
+        />
         <SceneLayer
           elements={decorationLayers.centerCap}
           slot="center-cap"
           clock={clock}
           showSecondHand={settings.showSecondHand}
           epochs={epochs}
+          revealProgressMs={revealProgressMs}
         />
       </svg>
     </div>

@@ -2,7 +2,8 @@ import dualRingFace from "../../assets/faces/dual-ring-face.svg";
 import barHour from "../../assets/hands/bar/hour.svg";
 import barMinute from "../../assets/hands/bar/minute.svg";
 import barSecond from "../../assets/hands/bar/second.svg";
-import fantasiaClockface from "../../assets/fantasia/clockface/clockface_scaled_edited_noback.png";
+import fantasiaClockfaceBottom from "../../assets/fantasia/clockface/clockface_bottom_solid_cream.png";
+import fantasiaClockface from "../../assets/fantasia/clockface/clockface_scaled_edited_carved_noback.png";
 import fantasiaHour from "../../assets/fantasia/hands/hands_hour_noback.png";
 import fantasiaMinute from "../../assets/fantasia/hands/hands_minute_noback.png";
 import fantasiaSecond from "../../assets/fantasia/hands/hands_second_noback.png";
@@ -18,6 +19,18 @@ import fantasiaNumeral9 from "../../assets/fantasia/numeral/numeral_9_noback.png
 import fantasiaNumeral10 from "../../assets/fantasia/numeral/numeral_10_noback.png";
 import fantasiaNumeral11 from "../../assets/fantasia/numeral/numeral_11_noback.png";
 import fantasiaNumeral12 from "../../assets/fantasia/numeral/numeral_12_noback.png";
+import fantasiaCharacter1 from "../../assets/fantasia/characters/character_1_noback.png";
+import fantasiaCharacter2 from "../../assets/fantasia/characters/character_2_noback.png";
+import fantasiaCharacter3 from "../../assets/fantasia/characters/character_3_noback.png";
+import fantasiaCharacter4 from "../../assets/fantasia/characters/character_4_noback.png";
+import fantasiaCharacter5 from "../../assets/fantasia/characters/character_5_noback.png";
+import fantasiaCharacter6 from "../../assets/fantasia/characters/character_6_noback.png";
+import fantasiaCharacter7 from "../../assets/fantasia/characters/character_7_noback.png";
+import fantasiaCharacter8 from "../../assets/fantasia/characters/character_8_noback.png";
+import fantasiaCharacter9 from "../../assets/fantasia/characters/character_9_noback.png";
+import fantasiaCharacter10 from "../../assets/fantasia/characters/character_10_noback.png";
+import fantasiaCharacter11 from "../../assets/fantasia/characters/character_11_noback.png";
+import fantasiaCharacter12 from "../../assets/fantasia/characters/character_12_noback.png";
 import type { ClockSceneDefinition, ClockSceneId } from "../../types/scene";
 
 function svgDataUrl(svg: string) {
@@ -47,8 +60,24 @@ const fantasiaNumerals = [
   fantasiaNumeral12,
 ];
 
+const fantasiaCharacters = [
+  fantasiaCharacter1,
+  fantasiaCharacter2,
+  fantasiaCharacter3,
+  fantasiaCharacter4,
+  fantasiaCharacter5,
+  fantasiaCharacter6,
+  fantasiaCharacter7,
+  fantasiaCharacter8,
+  fantasiaCharacter9,
+  fantasiaCharacter10,
+  fantasiaCharacter11,
+  fantasiaCharacter12,
+];
+
 const FANTASIA_NUMERAL_RADIUS = 32;
 const FANTASIA_NUMERAL_SIZE = 15.2;
+const FANTASIA_CHARACTER_SIZE = 13.4;
 
 function createFantasiaNumerals() {
   return fantasiaNumerals.map((src, index) => {
@@ -73,10 +102,34 @@ function createFantasiaNumerals() {
   });
 }
 
+function createFantasiaCharacters() {
+  return fantasiaCharacters.map((src, index) => {
+    const hourIndex = index + 1;
+
+    return {
+      id: `fantasia-character-${hourIndex}`,
+      src,
+      hourIndex,
+      x: 50,
+      y: 50,
+      polar: {
+        angle: hourIndex * 30,
+        radius: FANTASIA_NUMERAL_RADIUS,
+      },
+      width: FANTASIA_CHARACTER_SIZE,
+      height: FANTASIA_CHARACTER_SIZE,
+      anchorX: 0.5,
+      anchorY: 0.5,
+      zSlot: "characters" as const,
+    };
+  });
+}
+
 export const sceneRegistry: Record<ClockSceneId, ClockSceneDefinition> = {
   default: {
     id: "default",
     label: "Dual Ring",
+    clockfaceBottom: [],
     clockface: [
       {
         id: "dual-ring-face",
@@ -90,6 +143,7 @@ export const sceneRegistry: Record<ClockSceneId, ClockSceneDefinition> = {
         zSlot: "clockface",
       },
     ],
+    characters: [],
     numerals: [],
     decorations: [
       {
@@ -194,6 +248,19 @@ export const sceneRegistry: Record<ClockSceneId, ClockSceneDefinition> = {
   fantasia: {
     id: "fantasia",
     label: "Fantasia",
+    clockfaceBottom: [
+      {
+        id: "fantasia-clockface-bottom",
+        src: fantasiaClockfaceBottom,
+        x: 50,
+        y: 50.5,
+        width: 100,
+        height: 100,
+        anchorX: 0.5,
+        anchorY: 0.5,
+        zSlot: "clockface-bottom",
+      },
+    ],
     clockface: [
       {
         id: "fantasia-clockface",
@@ -207,6 +274,7 @@ export const sceneRegistry: Record<ClockSceneId, ClockSceneDefinition> = {
         zSlot: "clockface",
       },
     ],
+    characters: createFantasiaCharacters(),
     numerals: createFantasiaNumerals(),
     decorations: [],
     hands: [
