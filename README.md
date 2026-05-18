@@ -13,6 +13,7 @@ A browser-based Fantasia-style musical clock built with Vite, React, TypeScript,
 - Chime song registry with a bundled browser audio chime for static GitHub Pages playback
 - MIDI asset typing for source `.mid` and `.midi` files that can be rendered into browser audio assets
 - Scene-based asset registry for layered clockface, numerals, decorations, hands, and center-cap assets
+- Scene asset preloading so layered raster clocks appear together instead of revealing partial layers
 - Raster Fantasia clock assets with independently positioned numeral and hand layers
 - Polar coordinate positioning for easier circular numeral and decoration placement
 - Per-hand image sizing, anchor, pivot, hit-area, and animation configuration

@@ -9,6 +9,12 @@
   height: 100%;
   overflow: visible;
   touch-action: none;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+
+.stage[data-scene-assets-ready="true"] .svg {
+  opacity: 1;
 }
 
 .animated {

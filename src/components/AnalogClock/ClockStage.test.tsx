@@ -36,6 +36,49 @@ describe("ClockStage", () => {
     expect(layers).toEqual(["clockface-bottom", "characters", "numerals", "clockface", "decorations", "hands", "center-cap"]);
   });
 
+  it("marks the scene ready only after scene image assets finish loading", async () => {
+    const originalImage = window.Image;
+    const images: Array<{
+      onload: (() => void) | null;
+      onerror: (() => void) | null;
+      decode: () => Promise<void>;
+      src: string;
+    }> = [];
+
+    class MockImage {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      decode = vi.fn(() => Promise.resolve());
+      private imageSrc = "";
+
+      set src(value: string) {
+        this.imageSrc = value;
+        images.push(this);
+      }
+
+      get src() {
+        return this.imageSrc;
+      }
+    }
+
+    window.Image = MockImage as unknown as typeof Image;
+
+    try {
+      const { container } = render(<EngineHarness settings={DEFAULT_CLOCK_SETTINGS} />);
+      const stage = container.querySelector("[data-scene-assets-ready]");
+
+      expect(stage?.getAttribute("data-scene-assets-ready")).toBe("false");
+
+      await act(async () => {
+        images.forEach((image) => image.onload?.());
+      });
+
+      expect(stage?.getAttribute("data-scene-assets-ready")).toBe("true");
+    } finally {
+      window.Image = originalImage;
+    }
+  });
+
   it("clips moving Fantasia numerals to their home holes during reveal", () => {
     const animationFrames: FrameRequestCallback[] = [];
     const originalRequestAnimationFrame = window.requestAnimationFrame;

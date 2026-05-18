@@ -38,6 +38,77 @@ type FantasiaRevealTransform = {
   opacity?: number;
 };
 
+const loadedSceneAssetSrcs = new Set<string>();
+
+function getSceneAssetSrcs(scene: (typeof sceneRegistry)[ClockSettings["sceneId"]]) {
+  return [
+    ...scene.clockfaceBottom,
+    ...scene.characters,
+    ...scene.numerals,
+    ...scene.clockface,
+    ...scene.decorations,
+    ...scene.hands,
+  ]
+    .filter((element) => element.visible !== false)
+    .map((element) => element.src);
+}
+
+function loadSceneAsset(src: string) {
+  if (loadedSceneAssetSrcs.has(src)) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    const image = new Image();
+
+    const finish = () => {
+      loadedSceneAssetSrcs.add(src);
+      resolve();
+    };
+
+    image.onload = () => {
+      if (!image.decode) {
+        finish();
+        return;
+      }
+
+      image.decode().then(finish, finish);
+    };
+    image.onerror = finish;
+    image.src = src;
+  });
+}
+
+function useSceneAssetsReady(scene: (typeof sceneRegistry)[ClockSettings["sceneId"]]) {
+  const assetSrcs = useMemo(() => Array.from(new Set(getSceneAssetSrcs(scene))), [scene]);
+  const [ready, setReady] = useState(() => assetSrcs.every((src) => loadedSceneAssetSrcs.has(src)));
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (assetSrcs.length === 0 || assetSrcs.every((src) => loadedSceneAssetSrcs.has(src))) {
+      setReady(true);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setReady(false);
+
+    Promise.all(assetSrcs.map(loadSceneAsset)).then(() => {
+      if (isMounted) {
+        setReady(true);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [assetSrcs]);
+
+  return ready;
+}
+
 function getAnimationClassName(animation?: ElementAnimationConfig) {
   if (!animation?.enabled || animation.kind === "none") {
     return undefined;
@@ -369,6 +440,7 @@ export function ClockStage({ clock, settings, visualActionEpoch = 0 }: ClockStag
   const scene = sceneRegistry[settings.sceneId];
   const epochs = useAnimationEpochs(clock);
   const revealProgressMs = useFantasiaRevealProgress(settings.sceneId, visualActionEpoch);
+  const sceneAssetsReady = useSceneAssetsReady(scene);
   const decorationLayers = useMemo(
     () => ({
       decorations: scene.decorations.filter((element) => element.zSlot === "decorations"),
@@ -378,7 +450,7 @@ export function ClockStage({ clock, settings, visualActionEpoch = 0 }: ClockStag
   );
 
   return (
-    <div className={styles.stage}>
+    <div className={styles.stage} data-scene-assets-ready={sceneAssetsReady}>
       <svg className={styles.svg} viewBox="0 0 100 100" role="img" aria-label={clock.formattedTime}>
         <SceneLayer
           elements={scene.clockfaceBottom}

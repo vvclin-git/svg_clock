@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Fixed the Fantasia numeral reveal transform typing so the GitHub Pages build passes strict TypeScript checks.
+- Prevented partial clock rendering on startup by waiting for scene image assets before fading in the SVG.
 
 ## [0.4.0] - 2026-05-02
 
